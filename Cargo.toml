@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 graphql_client = "0.14.0"
 serde = "1.0.200"
 worker = "0.2.0"
+reqwest = { version = "0.12.4", features = ["json"] }
 
 [profile.release]
 opt-level = "s" # optimize for size in release builds

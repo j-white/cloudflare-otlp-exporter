@@ -1,4 +1,4 @@
-query GetWorkersAnalytics($accountTag: string, $datetimeStart: string, $datetimeEnd: string, $scriptName: string) {
+query GetWorkersAnalyticsQuery($accountTag: string, $datetimeStart: string, $datetimeEnd: string, $scriptName: string) {
     viewer {
       accounts(filter: {accountTag: $accountTag}) {
         workersInvocationsAdaptive(limit: 100, filter: {
