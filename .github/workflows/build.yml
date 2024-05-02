@@ -1,0 +1,17 @@
+name: build
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.75
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Cloudflare Worker build tools
+        run: cargo install -q worker-build
+      - name: Build Worker
+        run: |
+          worker-build --release
+      - name: Run (Rust) unit tests
+        run: cargo test
