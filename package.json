@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --env dev"
+    "dev": "wrangler dev --env dev",
+    "schema": "env-cmd -x get-graphql-schema -h 'Authorization=Bearer $CF_ANALYTICS_API_KEY' https://api.cloudflare.com/client/v4/graphql > gql/schema.graphql"
   },
   "devDependencies": {
+    "env-cmd": "^10.1.0",
+    "get-graphql-schema": "^2.1.2",
     "wrangler": "^3.53.0"
   }
 }
