@@ -1,6 +1,7 @@
-name = "worker-rust"
+name = "broker-worker"
 main = "build/worker/shim.mjs"
-compatibility_date = "2023-12-01"
+# See https://developers.cloudflare.com/workers/configuration/compatibility-dates/#compatibility-flags for latest
+compatibility_date = "2022-04-05"
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
