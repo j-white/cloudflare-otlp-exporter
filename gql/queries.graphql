@@ -1,0 +1,26 @@
+query GetWorkersAnalytics($accountTag: string, $datetimeStart: string, $datetimeEnd: string, $scriptName: string) {
+    viewer {
+      accounts(filter: {accountTag: $accountTag}) {
+        workersInvocationsAdaptive(limit: 100, filter: {
+          scriptName: $scriptName,
+          datetime_geq: $datetimeStart,
+          datetime_leq: $datetimeEnd
+        }) {
+          sum {
+            subrequests
+            requests
+            errors
+          }
+          quantiles {
+            cpuTimeP50
+            cpuTimeP99
+          }
+          dimensions{
+            datetime
+            scriptName
+            status
+          }
+        }
+      }
+    }
+  }
