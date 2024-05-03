@@ -5,6 +5,7 @@ use opentelemetry_sdk::metrics::SdkMeterProvider;
 use worker::*;
 
 mod gql;
+mod http;
 
 fn init_metrics() ->
                   core::result::Result<SdkMeterProvider, MetricsError> {
@@ -17,6 +18,7 @@ fn init_metrics() ->
         .with_exporter(
             opentelemetry_otlp::new_exporter()
                 .http()
+                .with_http_client(http::MyClient::new())
                 .with_export_config(export_config),
         )
         .build();

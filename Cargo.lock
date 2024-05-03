@@ -1788,6 +1788,7 @@ version = "0.1.0"
 dependencies = [
  "getrandom",
  "graphql_client",
+ "http 0.2.12",
  "opentelemetry",
  "opentelemetry-http",
  "opentelemetry-otlp",
