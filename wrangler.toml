@@ -3,6 +3,10 @@ main = "build/worker/shim.mjs"
 # See https://developers.cloudflare.com/workers/configuration/compatibility-dates/#compatibility-flags for latest
 compatibility_date = "2022-04-05"
 
+[triggers]
+# Run every minute
+crons = ["* * * * *"]
+
 [build]
 command = "cargo install -q worker-build && worker-build --release"
 
