@@ -10,6 +10,6 @@
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "get-graphql-schema": "^2.1.2",
-    "wrangler": "^3.53.0"
+    "wrangler": "^3.53.1"
   }
 }
