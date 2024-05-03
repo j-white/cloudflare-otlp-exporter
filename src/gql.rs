@@ -31,18 +31,18 @@ pub async fn perform_my_query(variables: get_workers_analytics_query::Variables)
     let res = client.post("/graphql").json(&request_body).send().await?;
     let response: get_workers_analytics_query::ResponseData = res.json().await?;
     let _ = response.viewer.unwrap().accounts.iter().map(|account| account.workers_invocations_adaptive.iter().map(|worker| {
-        let subrequests = worker.sum.as_ref().unwrap().subrequests;
-        let meter = global::meter("mylibraryname");
+        // See https://github.com/lablabs/cloudflare-exporter/blob/05e80d9cc5034c5a40b08f7630e6ca5a54c66b20/prometheus.go#L44C61-L44C93
+        let requests = worker.sum.as_ref().unwrap().requests;
+        let meter = global::meter("cloudflare_worker_requests");
         let gauge = meter
-            .u64_gauge("my_gauge")
-            .with_description("A gauge set to 1.0")
-            .with_unit(Unit::new("myunit"))
+            .u64_gauge("count")
+            .with_description("A gauge of the number of requests to a worker.")
+            .with_unit(Unit::new("requests"))
             .init();
         gauge.record(
-            subrequests,
+            requests,
             &[
-                KeyValue::new("mykey1", "myvalue1"),
-                KeyValue::new("mykey2", "myvalue2"),
+                KeyValue::new("script_name", worker.dimensions.as_ref().unwrap().script_name.clone())
             ],
         );
     }));
