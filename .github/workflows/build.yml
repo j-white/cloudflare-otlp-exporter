@@ -15,3 +15,7 @@ jobs:
           worker-build --release
       - name: Run (Rust) unit tests
         run: cargo test
+      - name: Install Node dependencies
+        run: npm install
+      - name: Run (Node) integration tests
+        run: npm run cucumber

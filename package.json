@@ -6,9 +6,19 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --env dev",
+    "cucumber": "cucumber-js",
     "schema": "env-cmd -x get-graphql-schema -h 'Authorization=Bearer $CF_ANALYTICS_API_KEY' https://api.cloudflare.com/client/v4/graphql > gql/schema.graphql"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240405.0",
+    "@cucumber/cucumber": "^10.4.0",
+    "@cucumber/pretty-formatter": "^1.0.1",
+    "@types/chai": "^4.3.14",
+    "@types/ws": "^8.5.10",
+    "chai": "^4.3.0",
+    "miniflare": "^3.20240405.2",
+    "npm-check-updates": "^16.14.18",
+    "ts-node": "^10.9.2",
     "env-cmd": "^10.1.0",
     "get-graphql-schema": "^2.1.2",
     "wrangler": "^3.53.1"
