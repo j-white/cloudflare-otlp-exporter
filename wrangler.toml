@@ -12,3 +12,8 @@ command = "cargo install -q worker-build && worker-build --release"
 
 [env.dev]
 build = { command = "cargo install -q worker-build && worker-build --dev" }
+
+[env.dev.vars]
+METRICS_URL = "http://collector:4318/v1/metrics"
+CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4/graphql"
+CLOUDFLARE_API_KEY = "fake"

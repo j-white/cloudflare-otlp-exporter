@@ -1,9 +1,18 @@
 import {Log, LogLevel, Miniflare} from "miniflare";
 import { MockAgent } from "undici";
 
+type MfConfig = {
+    metricsUrl: string|undefined;
+    cloudflareApiUrl: string|undefined
+};
+
 export class MiniflareDriver {
     mockAgent = new MockAgent();
     mf: Miniflare | undefined;
+    config: MfConfig = {
+        metricsUrl: undefined,
+        cloudflareApiUrl: undefined,
+    }
 
     start(options?: {metricsUrl?: string, cloudflareApiUrl?: string}): Miniflare {
         this.mockAgent
@@ -29,15 +38,12 @@ export class MiniflareDriver {
                 }
             );
 
-        let metricsUrl = "";
-        let cloudflareApiUrl = "";
-        if (options !== undefined) {
-            if (options.metricsUrl !== undefined) {
-                metricsUrl = options.metricsUrl;
-            }
-            if (options.cloudflareApiUrl !== undefined) {
-                cloudflareApiUrl = options.cloudflareApiUrl;
-            }
+        let self = this;
+        if(self.config.metricsUrl === undefined) {
+            throw new Error("metricsUrl is not defined!");
+        }
+        if(self.config.cloudflareApiUrl === undefined) {
+            throw new Error("cloudflareApiUrl is not defined!");
         }
 
         this.mf = new Miniflare({
@@ -51,6 +57,11 @@ export class MiniflareDriver {
                 compatibilityDate: "2022-04-05",
                 cache: true,
                 modules: true,
+                bindings: {
+                    METRICS_URL: self.config.metricsUrl,
+                    CLOUDFLARE_API_URL: self.config.cloudflareApiUrl,
+                    CLOUDFLARE_API_KEY: "fake-key",
+                },
                 modulesRules: [
                     { type: "CompiledWasm", include: ["**/*.wasm"], fallthrough: true },
                 ],
@@ -70,7 +81,10 @@ export class MiniflareDriver {
 
     async trigger() {
         this.start({});
-        await this.mf?.dispatchFetch("http://localhost:8787/cdn-cgi/mf/scheduled");
+        const res = await this.mf?.dispatchFetch("http://localhost:8787/");
+
+//        await this.mf?.dispatchFetch("http://fake.host/cdn-cgi/mf/scheduled");
+        console.log("Triggered worker");
         this.dispose();
     }
 }

@@ -40,6 +40,7 @@ export class OpenTelemetryServer {
     indexMetrics() {
         let self = this;
         this.metricNames.clear();
+        console.log("Indexing metrics", this.metrics);
         for (let metrics of this.metrics) {
             for (let resourceMetrics of metrics.resourceMetrics) {
                 for (let scopeMetrics of resourceMetrics.scopeMetrics) {

@@ -3,7 +3,6 @@ name = "worker-rust"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-license-file = "LICENSE"
 
 [lib]
 crate-type = ["cdylib"]
@@ -21,6 +20,7 @@ serde_json = "1.0.116"
 opentelemetry-http = { version="0.11.1" }
 opentelemetry-otlp = { version="0.15.0", features = ["metrics", "http-proto"], default-features = false }
 http = { version = "0.2.12"}
+tokio = { version = "1.37.0"}
 
 [profile.release]
 opt-level = "s" # optimize for size in release builds

@@ -6,14 +6,4 @@ const mf = new MiniflareDriver();
 const otelServer = new OpenTelemetryServer();
 const cloudflareMockServer = new CloudflareMockServer();
 
-type MfConfig = {
-    metricsUrl: string|undefined;
-    cloudflareApiUrl: string|undefined
-};
-
-const mfConfig: MfConfig = {
-    metricsUrl: undefined,
-    cloudflareApiUrl: undefined,
-}
-
-export { mf, mfConfig, otelServer, cloudflareMockServer };
+export { mf, otelServer, cloudflareMockServer };
