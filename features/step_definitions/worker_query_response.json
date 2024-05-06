@@ -1,0 +1,1549 @@
+{
+  "data": {
+    "viewer": {
+      "accounts": [
+        {
+          "workersInvocationsAdaptive": [
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:21:35Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 165526,
+                "cpuTimeP99": 165526
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:29:14Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 898907,
+                "cpuTimeP99": 898907
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:48:47Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 450428,
+                "cpuTimeP99": 450428
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T19:21:47Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 10506,
+                "cpuTimeP99": 10506
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:29:10Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 51489,
+                "cpuTimeP99": 51489
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T01:16:40Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 41602,
+                "cpuTimeP99": 41602
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:18:38Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 61421,
+                "cpuTimeP99": 61421
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T01:32:25Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 10958,
+                "cpuTimeP99": 10958
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T19:27:35Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 6957,
+                "cpuTimeP99": 6957
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:47:12Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 28291,
+                "cpuTimeP99": 28291
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:38:18Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 982910,
+                "cpuTimeP99": 982910
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:20:58Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1489675,
+                "cpuTimeP99": 1489675
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T18:21:05Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 77070,
+                "cpuTimeP99": 77070
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T06:03:05Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1446354,
+                "cpuTimeP99": 1446354
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T01:54:02Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 6886,
+                "cpuTimeP99": 6886
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:17:59Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 32774,
+                "cpuTimeP99": 32774
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:30:44Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 627408,
+                "cpuTimeP99": 627408
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T18:47:09Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 297564,
+                "cpuTimeP99": 297564
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:11:17Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 51090,
+                "cpuTimeP99": 51090
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:15:06Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 93841,
+                "cpuTimeP99": 93841
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:13:33Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 6922,
+                "cpuTimeP99": 6922
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:33:43Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 16432,
+                "cpuTimeP99": 16432
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:18:38Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 59452,
+                "cpuTimeP99": 59452
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:31:45Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 36099,
+                "cpuTimeP99": 36099
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T00:38:26Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 138396,
+                "cpuTimeP99": 158794
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 3,
+                "subrequests": 6
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T00:38:25Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 62623,
+                "cpuTimeP99": 178988
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 4,
+                "subrequests": 8
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:31:22Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 93964,
+                "cpuTimeP99": 95268
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 3,
+                "subrequests": 6
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:28:24Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 47871,
+                "cpuTimeP99": 56188
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:19:35Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 15387,
+                "cpuTimeP99": 15387
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T17:54:49Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 7257,
+                "cpuTimeP99": 7257
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:02:32Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 34366,
+                "cpuTimeP99": 34366
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:46:21Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 50044,
+                "cpuTimeP99": 50044
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T00:38:26Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 156131,
+                "cpuTimeP99": 186266
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 3,
+                "subrequests": 6
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T06:16:39Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1408137,
+                "cpuTimeP99": 1408137
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:18:33Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 8157,
+                "cpuTimeP99": 8157
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:02:32Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 74485,
+                "cpuTimeP99": 74485
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:08:33Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 45108,
+                "cpuTimeP99": 70148
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 3,
+                "subrequests": 6
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:37:00Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 76439,
+                "cpuTimeP99": 76439
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T01:36:45Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 82318,
+                "cpuTimeP99": 82318
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:45:50Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 8693,
+                "cpuTimeP99": 8693
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T22:51:21Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 621412,
+                "cpuTimeP99": 621412
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T14:25:07Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 255212,
+                "cpuTimeP99": 255212
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T15:50:05Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 129441,
+                "cpuTimeP99": 129441
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:03:32Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 23571,
+                "cpuTimeP99": 112494
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T15:49:35Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 8868,
+                "cpuTimeP99": 8868
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:33:59Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 18181,
+                "cpuTimeP99": 134570
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:02:31Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 52181,
+                "cpuTimeP99": 84649
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T01:16:10Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 9179,
+                "cpuTimeP99": 9179
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:15:16Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 62549,
+                "cpuTimeP99": 62549
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:32:46Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 39876,
+                "cpuTimeP99": 39876
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T14:24:37Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 11857,
+                "cpuTimeP99": 11857
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:49:00Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 30898,
+                "cpuTimeP99": 80874
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:41:17Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 9161,
+                "cpuTimeP99": 9161
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T00:38:25Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 57761,
+                "cpuTimeP99": 180755
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T19:41:43Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 230358,
+                "cpuTimeP99": 454414
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:59:03Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1459306,
+                "cpuTimeP99": 1459306
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:29:07Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 35470,
+                "cpuTimeP99": 35470
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:11:25Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 30731,
+                "cpuTimeP99": 30731
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:21:44Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 648493,
+                "cpuTimeP99": 648493
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:14:09Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 24811,
+                "cpuTimeP99": 24811
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:02:31Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 26317,
+                "cpuTimeP99": 26317
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:34:59Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 114328,
+                "cpuTimeP99": 114328
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:01:54Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 41293,
+                "cpuTimeP99": 41293
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T19:28:05Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 264197,
+                "cpuTimeP99": 264197
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:49:00Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 86689,
+                "cpuTimeP99": 458522
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 3,
+                "subrequests": 6
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T06:02:25Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1459426,
+                "cpuTimeP99": 1459426
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:47:42Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 29254,
+                "cpuTimeP99": 29254
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:51:48Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 145956,
+                "cpuTimeP99": 145956
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:15:50Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 8913,
+                "cpuTimeP99": 22184
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T06:16:54Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1011029,
+                "cpuTimeP99": 1011029
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T18:21:05Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 519936,
+                "cpuTimeP99": 519936
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:45:18Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1318946,
+                "cpuTimeP99": 1318946
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:06:57Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 70159,
+                "cpuTimeP99": 70159
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:05:49Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 101584,
+                "cpuTimeP99": 101584
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:32:31Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 75435,
+                "cpuTimeP99": 75435
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T17:55:20Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 32105,
+                "cpuTimeP99": 32105
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:08:33Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1477290,
+                "cpuTimeP99": 1477290
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:00:55Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 116508,
+                "cpuTimeP99": 116508
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:10:47Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 108043,
+                "cpuTimeP99": 108043
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:40:58Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 44887,
+                "cpuTimeP99": 44887
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:13:11Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1559088,
+                "cpuTimeP99": 1559088
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T19:22:18Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 311130,
+                "cpuTimeP99": 311130
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:52:22Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 1819849,
+                "cpuTimeP99": 1819849
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:21:32Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 45432,
+                "cpuTimeP99": 55368
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:58:23Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 64081,
+                "cpuTimeP99": 64081
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T13:58:44Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 41575,
+                "cpuTimeP99": 41575
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T06:14:02Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 298021,
+                "cpuTimeP99": 298021
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:18:04Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 35646,
+                "cpuTimeP99": 35646
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-05T00:41:48Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 63339,
+                "cpuTimeP99": 63339
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:11:25Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 59538,
+                "cpuTimeP99": 59538
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:31:20Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 654924,
+                "cpuTimeP99": 654924
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:21:32Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 15615,
+                "cpuTimeP99": 15615
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T04:03:32Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 25235,
+                "cpuTimeP99": 25235
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T03:33:59Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 65821,
+                "cpuTimeP99": 128732
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 2,
+                "subrequests": 4
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:09:48Z",
+                "scriptName": "my-worker",
+                "status": "success"
+              },
+              "quantiles": {
+                "cpuTimeP50": 59387,
+                "cpuTimeP99": 59387
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            },
+            {
+              "dimensions": {
+                "datetime": "2024-05-04T05:14:04Z",
+                "scriptName": "my-worker",
+                "status": "clientDisconnected"
+              },
+              "quantiles": {
+                "cpuTimeP50": 11822,
+                "cpuTimeP99": 11822
+              },
+              "sum": {
+                "errors": 0,
+                "requests": 1,
+                "subrequests": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "errors": null
+}

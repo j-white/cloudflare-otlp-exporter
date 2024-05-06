@@ -1,6 +1,7 @@
 import {After, Given, When, Then} from '@cucumber/cucumber';
 import {cloudflareMockServer, mf, otelServer} from "./state";
 import {expect} from "chai";
+import {Utils} from "./utils";
 
 Given('Worker is configured to point to mock Cloudflare API', function () {
     cloudflareMockServer.start();
@@ -17,14 +18,14 @@ When('Worker is triggered', async function () {
 });
 
 Then('Worker metrics are published', async function () {
-    await new Promise(r => setTimeout(r, 5000));
+    await Utils.waitUntil(() => otelServer.getMetrics().length > 0);
     let metrics = otelServer.getMetrics();
     expect(metrics).to.have.length.gte(1);
 });
 
 Then('Meter name should include {string}', function (metricName: string) {
     let metricNames = otelServer.getMetricNames();
-    expect(metricNames).to.contain(metricName);
+    expect(metricNames).to.include(metricName);
 });
 
 After(async function () {

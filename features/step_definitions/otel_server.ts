@@ -1,5 +1,5 @@
 import http from 'http';
-import {IExportMetricsServiceRequest} from "@opentelemetry/otlp-transformer";
+import {IExportMetricsServiceRequest, IResourceMetrics} from "@opentelemetry/otlp-transformer";
 import {AddressInfo} from "net";
 
 export class OpenTelemetryServer {
@@ -40,16 +40,15 @@ export class OpenTelemetryServer {
     indexMetrics() {
         let self = this;
         this.metricNames.clear();
-        console.log("Indexing metrics", this.metrics);
         for (let metrics of this.metrics) {
-            for (let resourceMetrics of metrics.resourceMetrics) {
-                for (let scopeMetrics of resourceMetrics.scopeMetrics) {
-                    for (let metric of scopeMetrics.metrics) {
-                        self.metricNames.set(metric.name, 1);
-                    }
+            let resourceMetrics = metrics.resourceMetrics as unknown as IResourceMetrics;
+            for (let scopeMetrics of resourceMetrics.scopeMetrics) {
+                for (let metric of scopeMetrics.metrics) {
+                    self.metricNames.set(metric.name, 1);
                 }
             }
         }
+        console.log("Indexed metrics", self.metricNames);
     }
 
     metricsUrl() {
@@ -69,6 +68,6 @@ export class OpenTelemetryServer {
     }
 
     getMetricNames() {
-        return this.metricNames.keys();
+        return Array.from(this.metricNames.keys());
     }
 }
