@@ -23,7 +23,7 @@ Then('Worker metrics are published', async function () {
     expect(metrics).to.have.length.gte(1);
 });
 
-Then('Meter name should include {string}', function (metricName: string) {
+Then('Metric name should include {string}', function (metricName: string) {
     let metricNames = otelServer.getMetricNames();
     expect(metricNames).to.include(metricName);
 });

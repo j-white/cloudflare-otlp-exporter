@@ -61,6 +61,7 @@ export class MiniflareDriver {
                     METRICS_URL: self.config.metricsUrl,
                     CLOUDFLARE_API_URL: self.config.cloudflareApiUrl,
                     CLOUDFLARE_API_KEY: "fake-key",
+                    CLOUDFLARE_ACCOUNT_ID: "1234",
                 },
                 modulesRules: [
                     { type: "CompiledWasm", include: ["**/*.wasm"], fallthrough: true },

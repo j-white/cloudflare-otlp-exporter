@@ -1,12 +1,10 @@
-use std::borrow::Cow;
 use std::error::Error;
-use std::sync::{Arc, Mutex};
 use graphql_client::{GraphQLQuery, Response};
-use opentelemetry::KeyValue;
-use opentelemetry::metrics::Unit;
-use opentelemetry_sdk::AttributeSet;
-use opentelemetry_sdk::metrics::data::{DataPoint, Metric};
-use opentelemetry_sdk::metrics::data::Gauge;
+use opentelemetry_sdk::metrics::data::Metric;
+use prometheus::{CounterVec, GaugeVec, Opts, Registry};
+use crate::metrics::prometheus_registry_to_opentelemetry_metrics;
+use web_time::SystemTime;
+use chrono::NaiveDateTime;
 
 // The paths are relative to the directory where your `Cargo.toml` is located.
 // Both json and the GraphQL schema language are supported as sources for the schema
@@ -30,8 +28,10 @@ type Time = String;
 #[allow(non_camel_case_types)]
 type uint64 = u64;
 
+#[allow(non_camel_case_types)]
+type float64 = f64;
+
 pub async fn perform_my_query(cloudflare_api_url: String, cloudflare_api_key: String, variables: get_workers_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
-    let metrics = Arc::new(Mutex::new(Vec::new()));
     let request_body = GetWorkersAnalyticsQuery::build_query(variables);
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
@@ -41,40 +41,58 @@ pub async fn perform_my_query(cloudflare_api_url: String, cloudflare_api_key: St
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
     let response_body: Response<get_workers_analytics_query::ResponseData> = res.json().await?;
-
     let response_data: get_workers_analytics_query::ResponseData = response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let worker_requests_opts = Opts::new("cloudflare_worker_requests", "number of requests to the worker");
+    let worker_requests = CounterVec::new(worker_requests_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(worker_requests.clone())).unwrap();
+
+    let worker_errors_opts = Opts::new("cloudflare_worker_errors", "number of failed requests to the worker");
+    let worker_errors = CounterVec::new(worker_errors_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(worker_errors.clone())).unwrap();
+
+    let worker_cpu_time_opts = Opts::new("cloudflare_worker_cpu_time", "cpu time processing request");
+    let worker_cpu_time = GaugeVec::new(worker_cpu_time_opts, &["script_name", "quantile"]).unwrap();
+    registry.register(Box::new(worker_cpu_time.clone())).unwrap();
+
+    let worker_duration_opts = Opts::new("cloudflare_worker_duration", "wall clock time processing request");
+    let worker_duration = GaugeVec::new(worker_duration_opts, &["script_name", "quantile"]).unwrap();
+    registry.register(Box::new(worker_duration.clone())).unwrap();
+
+    let mut last_datetime: Option<Time> = None;
     for account in response_data.clone().viewer.unwrap().accounts.iter() {
         for worker in account.workers_invocations_adaptive.iter() {
-            // See https://github.com/lablabs/cloudflare-exporter/blob/05e80d9cc5034c5a40b08f7630e6ca5a54c66b20/prometheus.go#L44C61-L44C93
-            let requests = worker.sum.as_ref().unwrap().requests;
-            let metric = create_metric("cloudflare_worker_requests".to_string(), "A gauge of the number of requests to a worker.".to_string(), requests, "requests".to_string()).unwrap();
-            metrics.lock().unwrap().push(metric);
+            let dimensions = worker.dimensions.as_ref().unwrap();
+            last_datetime = Some(dimensions.datetime.clone());
+            let script_name = dimensions.script_name.clone();
+            let sum = worker.sum.as_ref().unwrap();
+            let quantiles = worker.quantiles.as_ref().unwrap();
+
+            worker_requests.with_label_values(&[script_name.as_str()]).inc_by(sum.requests as f64);
+            worker_errors.with_label_values(&[script_name.as_str()]).inc_by(sum.errors as f64);
+            worker_cpu_time.with_label_values(&[script_name.as_str(), "P50"]).set(quantiles.cpu_time_p50 as f64);
+            worker_cpu_time.with_label_values(&[script_name.as_str(), "P75"]).set(quantiles.cpu_time_p75 as f64);
+            worker_cpu_time.with_label_values(&[script_name.as_str(), "P99"]).set(quantiles.cpu_time_p99 as f64);
+            worker_cpu_time.with_label_values(&[script_name.as_str(), "P999"]).set(quantiles.cpu_time_p999 as f64);
+            worker_duration.with_label_values(&[script_name.as_str(), "P50"]).set(quantiles.duration_p50 as f64);
+            worker_duration.with_label_values(&[script_name.as_str(), "P75"]).set(quantiles.duration_p75 as f64);
+            worker_duration.with_label_values(&[script_name.as_str(), "P99"]).set(quantiles.duration_p99 as f64);
+            worker_duration.with_label_values(&[script_name.as_str(), "P999"]).set(quantiles.duration_p999 as f64);
         }
     }
 
-    let mut vec = metrics.lock().unwrap();
-    let mut metrics_to_return: Vec<Metric> = Vec::new();
-    metrics_to_return.extend(vec.drain(..));
-    Ok(metrics_to_return)
+    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
+        datetime.and_utc().into()
+    }).unwrap_or_else(|| {
+        to_std_systemtime(SystemTime::now())
+    });
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
 }
 
-fn create_metric(name: String, description: String, value: uint64, unit:String) -> Result<Metric, Box<dyn Error>> {
-    let key_value = KeyValue::new("key", "value");
-    let attribute_set: AttributeSet = std::slice::from_ref(&key_value).into();
-    let data_point = DataPoint {
-        attributes: attribute_set,
-        start_time: None,
-        time: None,
-        value,
-        exemplars: vec![],
-    };
-    let sample: Gauge<u64> = Gauge {
-        data_points: vec![data_point],
-    };
-    Ok(Metric {
-        name: Cow::from(name),
-        description: Cow::from(description),
-        unit: Unit::new(unit),
-        data: Box::new(sample),
-    })
+fn to_std_systemtime(time: web_time::SystemTime) -> std::time::SystemTime {
+    let duration = time.duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap();
+    std::time::SystemTime::UNIX_EPOCH + duration
 }

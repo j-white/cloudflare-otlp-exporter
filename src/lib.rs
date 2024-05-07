@@ -6,6 +6,7 @@ use worker::wasm_bindgen::JsValue;
 use crate::gql::{get_workers_analytics_query, perform_my_query};
 
 mod gql;
+mod metrics;
 
 #[worker::send]
 pub async fn do_fetch(
@@ -25,12 +26,16 @@ async fn main(_req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let metrics_url = env.var("METRICS_URL")?.to_string();
     let cloudflare_api_url = env.var("CLOUDFLARE_API_URL")?.to_string();
     let cloudflare_api_key = env.var("CLOUDFLARE_API_KEY")?.to_string();
+    let cloudflare_account_id = env.var("CLOUDFLARE_ACCOUNT_ID")?.to_string();
+
+    let end = chrono::Utc::now();
+    let start = end - chrono::Duration::minutes(1);
 
     let result = perform_my_query(cloudflare_api_url, cloudflare_api_key, get_workers_analytics_query::Variables {
-        account_tag: Some("123".to_string()),
-        datetime_start: Some("2021-01-01T00:00:00Z".to_string()),
-        datetime_end: Some("2021-01-02T00:00:00Z".to_string()),
-        script_name: None,
+        account_tag: Some(cloudflare_account_id),
+        datetime_start: Some(start.to_string()),
+        datetime_end: Some(end.to_string()),
+        limit: 9999,
     }).await;
     let cf_metrics = match result {
         Ok(metrics) => metrics,
@@ -41,9 +46,9 @@ async fn main(_req: Request, env: Env, _ctx: Context) -> Result<Response> {
     };
 
     let library = opentelemetry::InstrumentationLibrary::new(
-        "my-crate",
+        "cloudflare-otlp-exporter",
         Some(env!("CARGO_PKG_VERSION")),
-        Some("https:// opentelemetry. io/ schemas/ 1.17.0"),
+        Some("https://github.com/j-white/cloudflare-otlp-exporter/v1.0.0"),
         None,
     );
     let scope_metrics = ScopeMetrics {
