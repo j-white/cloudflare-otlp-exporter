@@ -17,11 +17,8 @@ opentelemetry_sdk = { version="=0.22.1", default-features = false, features = ["
 opentelemetry-stdout = { version="0.3.0", default-features = false, features=["trace", "metrics"] }
 getrandom = { version = "0.2.14", features = ["js"] }
 serde_json = "1.0.116"
-opentelemetry-http = { version="0.11.1" }
 opentelemetry-otlp = { version="0.15.0", features = ["metrics", "http-proto"], default-features = false }
-tokio = { version = "1.37.0"}
 prometheus = "0.13.4"
-iso8601 = "0.6.1"
 web-time = "1.1.0"
 chrono = "0.4.38"
 
