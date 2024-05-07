@@ -145,6 +145,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-otlp-exporter"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "getrandom",
+ "graphql_client",
+ "iso8601",
+ "opentelemetry",
+ "opentelemetry-http",
+ "opentelemetry-otlp",
+ "opentelemetry-stdout",
+ "opentelemetry_sdk",
+ "prometheus",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "web-time",
+ "worker",
+]
+
+[[package]]
 name = "combine"
 version = "3.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1933,28 +1955,6 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-bindgen-macro-support",
  "worker-sys",
-]
-
-[[package]]
-name = "worker-rust"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "getrandom",
- "graphql_client",
- "iso8601",
- "opentelemetry",
- "opentelemetry-http",
- "opentelemetry-otlp",
- "opentelemetry-stdout",
- "opentelemetry_sdk",
- "prometheus",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "web-time",
- "worker",
 ]
 
 [[package]]
