@@ -9,18 +9,19 @@ crate-type = ["cdylib"]
 
 [dependencies]
 graphql_client = "0.14.0"
-serde = "1.0.200"
+serde = "1.0.201"
 worker = "0.2.0"
 reqwest = { version = "0.12.4", features = ["json"] }
-opentelemetry = { version = "=0.22.0", features = ["otel_unstable"] }
-opentelemetry_sdk = { version="=0.22.1", default-features = false, features = ["trace", "metrics", "rt-tokio-current-thread"] }
-opentelemetry-stdout = { version="0.3.0", default-features = false, features=["trace", "metrics"] }
-getrandom = { version = "0.2.14", features = ["js"] }
-serde_json = "1.0.116"
-opentelemetry-otlp = { version="0.15.0", features = ["metrics", "http-proto"], default-features = false }
+opentelemetry = { version = "=0.22.0", default-features = false, features = ["metrics"] }
+opentelemetry_sdk = { version="=0.22.1", default-features = false, features = ["metrics"] }
+getrandom = { version = "0.2.15", features = ["js"] }
+serde_json = "1.0.117"
+opentelemetry-otlp = { version="0.15.0", default-features = false, features = ["metrics", "http-proto"] }
+opentelemetry-proto = { version = "0.5.0", default-features = false, features = ["metrics", "with-serde"] }
 prometheus = "0.13.4"
 web-time = "1.1.0"
 chrono = "0.4.38"
+prost = "0.12.4"
 
 [profile.release]
 opt-level = "s" # optimize for size in release builds

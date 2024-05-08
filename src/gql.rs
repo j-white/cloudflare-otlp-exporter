@@ -5,6 +5,7 @@ use prometheus::{CounterVec, GaugeVec, Opts, Registry};
 use crate::metrics::prometheus_registry_to_opentelemetry_metrics;
 use web_time::SystemTime;
 use chrono::NaiveDateTime;
+use worker::console_log;
 
 // The paths are relative to the directory where your `Cargo.toml` is located.
 // Both json and the GraphQL schema language are supported as sources for the schema
@@ -37,10 +38,17 @@ pub async fn perform_my_query(cloudflare_api_url: String, cloudflare_api_key: St
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
+
     if !res.status().is_success() {
+        console_log!("GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
+
     let response_body: Response<get_workers_analytics_query::ResponseData> = res.json().await?;
+    if response_body.errors.is_some() {
+        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
     let response_data: get_workers_analytics_query::ResponseData = response_body.data.expect("missing response data");
 
     let registry = Registry::new();

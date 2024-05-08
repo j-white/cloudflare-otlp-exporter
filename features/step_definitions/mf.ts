@@ -62,6 +62,7 @@ export class MiniflareDriver {
                     CLOUDFLARE_API_URL: self.config.cloudflareApiUrl,
                     CLOUDFLARE_API_KEY: "fake-key",
                     CLOUDFLARE_ACCOUNT_ID: "1234",
+                    OTLP_ENCODING: "json",
                 },
                 modulesRules: [
                     { type: "CompiledWasm", include: ["**/*.wasm"], fallthrough: true },

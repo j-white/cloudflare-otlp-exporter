@@ -40,11 +40,13 @@ export class OpenTelemetryServer {
     indexMetrics() {
         let self = this;
         this.metricNames.clear();
+        console.log(JSON.stringify(this.metrics, null, 2));
         for (let metrics of this.metrics) {
-            let resourceMetrics = metrics.resourceMetrics as unknown as IResourceMetrics;
-            for (let scopeMetrics of resourceMetrics.scopeMetrics) {
-                for (let metric of scopeMetrics.metrics) {
-                    self.metricNames.set(metric.name, 1);
+            for (let resourceMetrics of metrics.resourceMetrics) {
+                for (let scopeMetrics of resourceMetrics.scopeMetrics) {
+                    for (let metric of scopeMetrics.metrics) {
+                        self.metricNames.set(metric.name, 1);
+                    }
                 }
             }
         }
