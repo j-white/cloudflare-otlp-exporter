@@ -7,7 +7,8 @@ export class CloudflareMockServer {
 
     start() {
         let self = this;
-        const fileContents = fs.readFileSync('./features/step_definitions/worker_query_response.json').toString()
+        const workerQuery = fs.readFileSync('./features/step_definitions/worker_query_response.json').toString();
+        const d1Query = fs.readFileSync('./features/step_definitions/d1_query_response.json').toString();
         this.server = http.createServer((req, res) => {
             var body = "";
             req.on('readable', function() {
@@ -16,10 +17,15 @@ export class CloudflareMockServer {
                     body += part;
                 }
             });
+
             req.on('end', function() {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(fileContents);
+                if (body.indexOf('d1AnalyticsAdaptiveGroups') > -1) {
+                    res.end(d1Query);
+                } else {
+                    res.end(workerQuery);
+                }
             });
         });
         this.server.listen(() => {

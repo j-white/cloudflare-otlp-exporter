@@ -1,0 +1,29 @@
+query GetD1AnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+  viewer {
+    accounts(filter: {accountTag: $accountTag}) {
+      d1AnalyticsAdaptiveGroups(limit: $limit, filter: {
+        datetimeMinute_geq: $datetimeStart,
+        datetimeMinute_lt: $datetimeEnd
+      }) {
+        dimensions {
+          databaseId
+          datetimeMinute
+        }
+
+        sum {
+          readQueries
+          rowsRead
+          rowsWritten
+          writeQueries
+        }
+
+        quantiles {
+          queryBatchResponseBytesP50
+          queryBatchResponseBytesP90
+          queryBatchTimeMsP50
+          queryBatchTimeMsP90
+        }
+      }
+    }
+  }
+}

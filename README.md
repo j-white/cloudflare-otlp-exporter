@@ -7,6 +7,14 @@ This worker was written to push Cloudflare Analytics data to an OpenTelemetry co
 It is inspired by the [cloudflare-exporter](https://github.com/lablabs/cloudflare-exporter), which is unfortunately no longer maintained.
 By running it as a worker and pushing metrics, we avoid the need to deploy a dedicated container and allow the worker to be run on [green compute](https://blog.cloudflare.com/announcing-green-compute).
 
+## Metrics currently support
+
+- [x] Workers
+- [x] D1
+- [ ] Queues
+- [ ] Durable Objects
+- [ ] Zones
+
 ## Usage
 
 * Clone the repo

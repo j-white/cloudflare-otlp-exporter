@@ -1,14 +1,14 @@
 use std::env;
 use chrono::SubsecRound;
 use opentelemetry_proto::tonic::collector::metrics::v1::ExportMetricsServiceRequest;
-use opentelemetry_sdk::metrics::data::{ResourceMetrics, ScopeMetrics};
+use opentelemetry_sdk::metrics::data::{Metric, ResourceMetrics, ScopeMetrics};
 use opentelemetry_sdk::Resource;
 use prost::Message;
 
 use worker::*;
 use worker::js_sys::Uint8Array;
 use worker::wasm_bindgen::JsValue;
-use crate::gql::{get_workers_analytics_query, perform_my_query};
+use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query};
 
 mod gql;
 mod metrics;
@@ -23,7 +23,6 @@ pub async fn do_fetch(
     let mut http_headers = Headers::new();
     // split headers by command, and then by =
     for header in headers.split(",") {
-        console_log!("header: {}", header);
         let parts: Vec<&str> = header.splitn(2, "=").collect();
         if parts.len() == 2 {
             let key = parts[0].trim();
@@ -59,10 +58,58 @@ async fn main(_req: ScheduledEvent, env: Env, _ctx: ScheduleContext) -> () {
 }
 
 async fn do_trigger(env: Env) -> Result<()> {
-    let metrics_url = env.var("METRICS_URL")?.to_string();
     let cloudflare_api_url = env.var("CLOUDFLARE_API_URL")?.to_string();
     let cloudflare_api_key = env.var("CLOUDFLARE_API_KEY")?.to_string();
     let cloudflare_account_id = env.var("CLOUDFLARE_ACCOUNT_ID")?.to_string();
+
+    let end = chrono::Utc::now().round_subsecs(0);
+    let start = (end - chrono::Duration::minutes(1)).round_subsecs(0);
+
+    console_log!("Fetching!");
+    let mut all_metrics = Vec::new();
+
+    let result = do_get_workers_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_workers_analytics_query::Variables {
+        account_tag: cloudflare_account_id.clone(),
+        datetime_start: Some(start.to_rfc3339()),
+        datetime_end: Some(end.to_rfc3339()),
+        limit: 9999,
+    }).await;
+    match result {
+        Ok(metrics) => {
+            for metric in metrics {
+                all_metrics.push(metric);
+            }
+        },
+        Err(e) => {
+            console_log!("Querying Cloudflare API failed: {:?}", e);
+            return Err(Error::JsError(e.to_string()));
+        }
+    };
+
+    let result = do_get_d1_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_d1_analytics_query::Variables {
+        account_tag: cloudflare_account_id.clone(),
+        datetime_start: Some(start.to_rfc3339()),
+        datetime_end: Some(end.to_rfc3339()),
+        limit: 9999,
+    }).await;
+    match result {
+        Ok(metrics) => {
+            for metric in metrics {
+                all_metrics.push(metric);
+            }
+        },
+        Err(e) => {
+            console_log!("Querying Cloudflare API failed: {:?}", e);
+            return Err(Error::JsError(e.to_string()));
+        }
+    };
+    console_log!("Done fetching!");
+
+    do_push_metrics(env, all_metrics).await
+}
+
+async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
+    let metrics_url = env.var("METRICS_URL")?.to_string();
     let otlp_headers = match env.var("OTLP_HEADERS") {
         Ok(val) => val.to_string(),
         Err(_) => String::from(""),
@@ -75,25 +122,6 @@ async fn do_trigger(env: Env) -> Result<()> {
         Err(_) => false,
     };
 
-    let end = chrono::Utc::now().round_subsecs(0);
-    let start = (end - chrono::Duration::minutes(1)).round_subsecs(0);
-
-    console_log!("Fetching!");
-    let result = perform_my_query(cloudflare_api_url, cloudflare_api_key, get_workers_analytics_query::Variables {
-        account_tag: Some(cloudflare_account_id),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
-        limit: 9999,
-    }).await;
-    let cf_metrics = match result {
-        Ok(metrics) => metrics,
-        Err(e) => {
-            console_log!("Querying Cloudflare API failed: {:?}", e);
-            return Err(Error::JsError(e.to_string()));
-        }
-    };
-    console_log!("Done fetching!");
-
     console_log!("Converting metrics to OTLP.");
     let library = opentelemetry::InstrumentationLibrary::new(
         "cloudflare-otlp-exporter",
@@ -103,7 +131,7 @@ async fn do_trigger(env: Env) -> Result<()> {
     );
     let scope_metrics = ScopeMetrics {
         scope: library,
-        metrics: cf_metrics,
+        metrics
     };
     let resource_metrics = ResourceMetrics {
         resource: Resource::empty(),

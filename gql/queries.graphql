@@ -1,33 +1,91 @@
-query GetWorkersAnalyticsQuery($accountTag: string, $datetimeStart: string, $datetimeEnd: string, $limit: Int!) {
-    viewer {
-      accounts(filter: {accountTag: $accountTag}) {
-        workersInvocationsAdaptive(limit: $limit, filter: {
-          datetime_geq: $datetimeStart,
-          datetime_lt: $datetimeEnd
-        }) {
-          dimensions {
-            scriptName
-            status
-            datetime
-          }
 
-          sum {
-            requests
-            errors
-            duration
-          }
 
-          quantiles {
-            cpuTimeP50
-            cpuTimeP75
-            cpuTimeP99
-            cpuTimeP999
-            durationP50
-            durationP75
-            durationP99
-            durationP999
-          }
+query GetDurableObjectsAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+  viewer {
+    accounts(filter: {accountTag: $accountTag}) {
+      durableObjectsInvocationsAdaptiveGroups(limit: $limit, filter: {
+        datetimeMinute_geq: $datetimeStart,
+        datetimeMinute_lt: $datetimeEnd
+      }) {
+        dimensions {
+          scriptName
+          datetimeMinute
+        }
+
+        sum {
+          errors
+          requests
+          responseBodySize
+          wallTime
+        }
+
+        quantiles {
+          responseBodySizeP25
+          responseBodySizeP50
+          responseBodySizeP75
+          responseBodySizeP90
+          responseBodySizeP99
+          responseBodySizeP999
+          wallTimeP25
+          wallTimeP50
+          wallTimeP75
+          wallTimeP90
+          wallTimeP99
+          wallTimeP999
         }
       }
     }
   }
+}
+
+query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+  viewer {
+    accounts(filter: {accountTag: $accountTag}) {
+      queueBacklogAdaptiveGroups(limit: $limit, filter: {
+        datetimeMinute_geq: $datetimeStart,
+        datetimeMinute_lt: $datetimeEnd
+      }) {
+        dimensions {
+          queueId
+          datetimeMinute
+        }
+
+        avg {
+          bytes
+          messages
+          sampleInterval
+        }
+      }
+
+      queueConsumerMetricsAdaptiveGroups(limit: $limit, filter: {
+        datetimeMinute_geq: $datetimeStart,
+        datetimeMinute_lt: $datetimeEnd
+      }) {
+        dimensions {
+          queueId
+          datetimeMinute
+        }
+
+        avg {
+          concurrency
+          sampleInterval
+        }
+      }
+
+      queueMessageOperationsAdaptiveGroups(limit: $limit, filter: {
+        datetimeMinute_geq: $datetimeStart,
+        datetimeMinute_lt: $datetimeEnd
+      }) {
+        dimensions {
+          queueId
+          datetimeMinute
+        }
+
+        avg {
+          lagTime
+          retryCount
+        }
+      }
+    }
+  }
+}
