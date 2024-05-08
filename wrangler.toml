@@ -14,8 +14,10 @@ command = "cargo install -q worker-build && worker-build --release"
 build = { command = "cargo install -q worker-build && worker-build --dev" }
 
 [env.dev.vars]
-METRICS_URL = "http://collector:4318/v1/metrics"
-OTLP_HEADERS = "Authorization=Basic <base64 instanceID:token>"
+METRICS_URL = "https://otlp-gateway/otlp/v1/metrics"
+# Comma separate list of headers to include in the request to the OTLP Gateway
+# OTLP_HEADERS = "Authorization=Basic deadbeef=="
 CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4/graphql"
-CLOUDFLARE_API_KEY = "fake"
-CLOUDFLARE_ACCOUNT_ID = "1234"
+CLOUDFLARE_API_KEY = "whyareyousonosy"
+CLOUDFLARE_ACCOUNT_ID = "secret"
+OTLP_ENCODING = "protobuf"
