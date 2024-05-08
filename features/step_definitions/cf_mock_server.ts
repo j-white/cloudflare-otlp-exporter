@@ -7,8 +7,9 @@ export class CloudflareMockServer {
 
     start() {
         let self = this;
-        const workerQuery = fs.readFileSync('./features/step_definitions/worker_query_response.json').toString();
-        const d1Query = fs.readFileSync('./features/step_definitions/d1_query_response.json').toString();
+        const workerQuery = fs.readFileSync('./features/data/worker_query_response.json').toString();
+        const d1Query = fs.readFileSync('./features/data/d1_query_response.json').toString();
+        const durableObjectsQuery = fs.readFileSync('./features/data/durableobjects_query_response.json').toString();
         this.server = http.createServer((req, res) => {
             var body = "";
             req.on('readable', function() {
@@ -23,6 +24,8 @@ export class CloudflareMockServer {
                 res.setHeader('Content-Type', 'application/json');
                 if (body.indexOf('d1AnalyticsAdaptiveGroups') > -1) {
                     res.end(d1Query);
+                } else if (body.indexOf('durableObjectsInvocationsAdaptiveGroups') > -1) {
+                    res.end(durableObjectsQuery);
                 } else {
                     res.end(workerQuery);
                 }

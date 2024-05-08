@@ -12,7 +12,7 @@ use worker::console_log;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/workers.graphql",
+    query_path = "gql/workers_query.graphql",
     variables_derives = "Debug",
     response_derives = "Debug,Clone"
 )]
@@ -21,21 +21,21 @@ pub struct GetWorkersAnalyticsQuery;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/d1.graphql",
+    query_path = "gql/d1_query.graphql",
     variables_derives = "Debug",
     response_derives = "Debug,Clone"
 )]
 pub struct GetD1AnalyticsQuery;
 
-// #[derive(GraphQLQuery)]
-// #[graphql(
-//     schema_path = "gql/schema.graphql",
-//     query_path = "gql/queries.graphql",
-//     variables_derives = "Debug",
-//     response_derives = "Debug,Clone"
-// )]
-// pub struct GetDurableObjectsAnalyticsQuery;
-//
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
+    query_path = "gql/durableobjects_query.graphql",
+    variables_derives = "Debug",
+    response_derives = "Debug,Clone"
+)]
+pub struct GetDurableObjectsAnalyticsQuery;
+
 // #[derive(GraphQLQuery)]
 // #[graphql(
 //     schema_path = "gql/schema.graphql",
@@ -195,6 +195,81 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
             d1_query_batch_response_bytes.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_response_bytes_p90 as f64);
             d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P50"]).set(quantiles.query_batch_time_ms_p50 as f64);
             d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_time_ms_p90 as f64);
+        }
+    }
+
+    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
+        datetime.and_utc().into()
+    }).unwrap_or_else(|| {
+        to_std_systemtime(SystemTime::now())
+    });
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+}
+
+pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_durable_objects_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetDurableObjectsAnalyticsQuery::build_query(variables);
+    //console_log!("request_body: {:?}", request_body);
+    let client = reqwest::Client::new();
+    let res = client.post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body).send().await?;
+
+    if !res.status().is_success() {
+        console_log!("GraphQL query failed: {:?}", res.status());
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_body: Response<get_durable_objects_analytics_query::ResponseData> = res.json().await?;
+    if response_body.errors.is_some() {
+        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_durable_objects_analytics_query::ResponseData = response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let do_errors_opts = Opts::new("cloudflare_durable_objects_errors", "Sum of errors");
+    let do_errors = CounterVec::new(do_errors_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(do_errors.clone())).unwrap();
+
+    let do_requests_opts = Opts::new("cloudflare_durable_objects_requests", "Sum of requests");
+    let do_requests = CounterVec::new(do_requests_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(do_requests.clone())).unwrap();
+
+    let do_response_body_size_bytes_opts = Opts::new("cloudflare_durable_objects_response_body_size_bytes", "Response body size - bytes");
+    let do_response_body_size_bytes = GaugeVec::new(do_response_body_size_bytes_opts, &["script_name", "quantile"]).unwrap();
+    registry.register(Box::new(do_response_body_size_bytes.clone())).unwrap();
+
+    let do_wall_time_microseconds_opts = Opts::new("cloudflare_durable_objects_wall_time_microseconds", "Wall time - microseconds");
+    let do_wall_time_microseconds = GaugeVec::new(do_wall_time_microseconds_opts, &["script_name", "quantile"]).unwrap();
+    registry.register(Box::new(do_wall_time_microseconds.clone())).unwrap();
+
+    let mut last_datetime: Option<Time> = None;
+    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+        for group in account.durable_objects_invocations_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            last_datetime = Some(dimensions.datetime_minute.clone());
+            let script_name = dimensions.script_name.clone();
+            let sum = group.sum.as_ref().unwrap();
+            let quantiles = group.quantiles.as_ref().unwrap();
+
+            do_errors.with_label_values(&[script_name.as_str()]).inc_by(sum.errors as f64);
+            do_requests.with_label_values(&[script_name.as_str()]).inc_by(sum.requests as f64);
+
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P25"]).set(quantiles.response_body_size_p25 as f64);
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P50"]).set(quantiles.response_body_size_p50 as f64);
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P75"]).set(quantiles.response_body_size_p75 as f64);
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P90"]).set(quantiles.response_body_size_p90 as f64);
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P99"]).set(quantiles.response_body_size_p99 as f64);
+            do_response_body_size_bytes.with_label_values(&[script_name.as_str(), "P999"]).set(quantiles.response_body_size_p999 as f64);
+
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P25"]).set(quantiles.wall_time_p25 as f64);
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P50"]).set(quantiles.wall_time_p50 as f64);
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P75"]).set(quantiles.wall_time_p75 as f64);
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P90"]).set(quantiles.wall_time_p90 as f64);
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P99"]).set(quantiles.wall_time_p99 as f64);
+            do_wall_time_microseconds.with_label_values(&[script_name.as_str(), "P999"]).set(quantiles.wall_time_p999 as f64);
         }
     }
 
