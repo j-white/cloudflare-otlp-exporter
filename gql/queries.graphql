@@ -1,22 +1,6 @@
 query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
   viewer {
     accounts(filter: {accountTag: $accountTag}) {
-      queueBacklogAdaptiveGroups(limit: $limit, filter: {
-        datetimeMinute_geq: $datetimeStart,
-        datetimeMinute_lt: $datetimeEnd
-      }) {
-        dimensions {
-          queueId
-          datetimeMinute
-        }
-
-        avg {
-          bytes
-          messages
-          sampleInterval
-        }
-      }
-
       queueConsumerMetricsAdaptiveGroups(limit: $limit, filter: {
         datetimeMinute_geq: $datetimeStart,
         datetimeMinute_lt: $datetimeEnd
@@ -29,21 +13,6 @@ query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $dateti
         avg {
           concurrency
           sampleInterval
-        }
-      }
-
-      queueMessageOperationsAdaptiveGroups(limit: $limit, filter: {
-        datetimeMinute_geq: $datetimeStart,
-        datetimeMinute_lt: $datetimeEnd
-      }) {
-        dimensions {
-          queueId
-          datetimeMinute
-        }
-
-        avg {
-          lagTime
-          retryCount
         }
       }
     }

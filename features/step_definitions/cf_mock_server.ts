@@ -29,6 +29,8 @@ export class CloudflareMockServer {
                     res.end(durableObjectsQuery);
                 } else if (body.indexOf('queueBacklogAdaptiveGroups') > -1) {
                     res.end(queueBacklogQuery);
+                } else if (body.indexOf('queueMessageOperationsAdaptiveGroups') > -1) {
+                    res.end("{\"data\":{\"viewer\":{\"accounts\":[{\"queueMessageOperationsAdaptiveGroups\":[]}]}},\"errors\":null}");
                 } else {
                     res.end(workerQuery);
                 }

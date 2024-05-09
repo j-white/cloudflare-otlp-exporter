@@ -45,6 +45,15 @@ pub struct GetDurableObjectsAnalyticsQuery;
 )]
 pub struct GetQueueBacklogAnalyticsQuery;
 
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
+    query_path = "gql/queue_operations_query.graphql",
+    variables_derives = "Debug",
+    response_derives = "Debug,Clone"
+)]
+pub struct GetQueueOperationsAnalyticsQuery;
+
 #[allow(non_camel_case_types)]
 type float32 = f32;
 
@@ -340,6 +349,77 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
 }
 
+pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_operations_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetQueueOperationsAnalyticsQuery::build_query(variables);
+    //console_log!("request_body: {:?}", request_body);
+    let client = reqwest::Client::new();
+    let res = client.post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body).send().await?;
+
+    if !res.status().is_success() {
+        console_log!("GraphQL query failed: {:?}", res.status());
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_body: Response<get_queue_operations_analytics_query::ResponseData> = res.json().await?;
+    if response_body.errors.is_some() {
+        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_queue_operations_analytics_query::ResponseData = response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let queue_billable_opts = Opts::new("cloudflare_queue_operations_billable", "Number of Billable Operations (some message operations count as multiple billable operations)");
+    let queue_billable = CounterVec::new(queue_billable_opts, &["queue_id"]).unwrap();
+    registry.register(Box::new(queue_billable.clone())).unwrap();
+
+    let queue_lag_time_ms_opts = Opts::new("cloudflare_queue_operations_lag_time_ms", "The average time in milliseconds between when the message was written to the queue and the current operation over the sample interval. Will always be 0 for WriteMessage operations.");
+    let queue_lag_time_ms = GaugeVec::new(queue_lag_time_ms_opts, &["action_type", "consumer_type", "queue_id", "outcome"]).unwrap();
+    registry.register(Box::new(queue_lag_time_ms.clone())).unwrap();
+
+    let queue_retry_count_opts = Opts::new("cloudflare_queue_operations_retry_count", "The average number of retries per message operation. A retry occurs after an unsucessful delivery, if the queue is configured to retry failed attempts. Only applicable to ReadMessage and DeleteMessage operations. Will always be 0 for WriteMessage operations.");
+    let queue_retry_count = GaugeVec::new(queue_retry_count_opts, &["action_type", "consumer_type", "queue_id", "outcome"]).unwrap();
+    registry.register(Box::new(queue_retry_count.clone())).unwrap();
+
+    let queue_sample_interval_opts = Opts::new("cloudflare_queue_operations_sample_interval", "The average value used for sample interval");
+    let queue_sample_interval = GaugeVec::new(queue_sample_interval_opts, &["action_type", "consumer_type", "queue_id", "outcome"]).unwrap();
+    registry.register(Box::new(queue_sample_interval.clone())).unwrap();
+
+    let mut last_datetime: Option<Time> = None;
+    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+        for group in account.queue_message_operations_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            last_datetime = Some(dimensions.datetime.clone());
+            let action_type = dimensions.action_type.clone();
+            let consumer_type = dimensions.consumer_type.clone();
+            let queue_id = dimensions.queue_id.clone();
+            let outcome = dimensions.outcome.clone();
+
+            let sum = group.sum.as_ref().unwrap();
+            let avg = group.avg.as_ref().unwrap();
+
+            queue_billable.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
+                queue_id.as_str(), outcome.as_str()]).inc_by(sum.billable_operations as f64);
+
+            queue_lag_time_ms.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
+                queue_id.as_str(), outcome.as_str()]).set(avg.lag_time as f64);
+            queue_retry_count.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
+                queue_id.as_str(), outcome.as_str()]).set(avg.retry_count as f64);
+            queue_sample_interval.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
+                queue_id.as_str(), outcome.as_str()]).set(avg.sample_interval as f64);
+        }
+    }
+
+    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
+        datetime.and_utc().into()
+    }).unwrap_or_else(|| {
+        to_std_systemtime(SystemTime::now())
+    });
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+}
 
 fn to_std_systemtime(time: web_time::SystemTime) -> std::time::SystemTime {
     let duration = time.duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap();

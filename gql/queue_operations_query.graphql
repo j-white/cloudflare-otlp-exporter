@@ -1,0 +1,28 @@
+query GetQueueOperationsAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+    viewer {
+        accounts(filter: {accountTag: $accountTag}) {
+            queueMessageOperationsAdaptiveGroups(limit: $limit, filter: {
+                datetimeMinute_geq: $datetimeStart,
+                datetimeMinute_lt: $datetimeEnd
+            }) {
+                dimensions {
+                    actionType
+                    consumerType
+                    queueId
+                    outcome
+                    datetime
+                }
+
+                sum {
+                    billableOperations
+                }
+
+                avg {
+                    lagTime
+                    retryCount
+                    sampleInterval
+                }
+            }
+        }
+    }
+}
