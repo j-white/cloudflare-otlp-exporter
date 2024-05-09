@@ -10,6 +10,7 @@ export class CloudflareMockServer {
         const workerQuery = fs.readFileSync('./features/data/worker_query_response.json').toString();
         const d1Query = fs.readFileSync('./features/data/d1_query_response.json').toString();
         const durableObjectsQuery = fs.readFileSync('./features/data/durableobjects_query_response.json').toString();
+        const queueBacklogQuery = fs.readFileSync('./features/data/queue_backlog_query_response.json').toString();
         this.server = http.createServer((req, res) => {
             var body = "";
             req.on('readable', function() {
@@ -26,6 +27,8 @@ export class CloudflareMockServer {
                     res.end(d1Query);
                 } else if (body.indexOf('durableObjectsInvocationsAdaptiveGroups') > -1) {
                     res.end(durableObjectsQuery);
+                } else if (body.indexOf('queueBacklogAdaptiveGroups') > -1) {
+                    res.end(queueBacklogQuery);
                 } else {
                     res.end(workerQuery);
                 }

@@ -1,0 +1,21 @@
+query GetQueueBacklogAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+    viewer {
+        accounts(filter: {accountTag: $accountTag}) {
+            queueBacklogAdaptiveGroups(limit: $limit, filter: {
+                datetimeMinute_geq: $datetimeStart,
+                datetimeMinute_lt: $datetimeEnd
+            }) {
+                dimensions {
+                    queueId
+                    datetimeMinute
+                }
+
+                avg {
+                    bytes
+                    messages
+                    sampleInterval
+                }
+            }
+        }
+    }
+}

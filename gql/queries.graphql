@@ -1,7 +1,3 @@
-
-
-
-
 query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
   viewer {
     accounts(filter: {accountTag: $accountTag}) {

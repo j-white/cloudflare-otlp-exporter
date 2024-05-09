@@ -8,7 +8,7 @@ use prost::Message;
 use worker::*;
 use worker::js_sys::Uint8Array;
 use worker::wasm_bindgen::JsValue;
-use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query, do_get_durableobjects_analytics_query, get_durable_objects_analytics_query};
+use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query, do_get_durableobjects_analytics_query, get_durable_objects_analytics_query, do_get_queue_backlog_analytics_query, get_queue_backlog_analytics_query};
 
 mod gql;
 mod metrics;
@@ -105,6 +105,24 @@ async fn do_trigger(env: Env) -> Result<()> {
     };
 
     let result = do_get_durableobjects_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_durable_objects_analytics_query::Variables {
+        account_tag: cloudflare_account_id.clone(),
+        datetime_start: Some(start.to_rfc3339()),
+        datetime_end: Some(end.to_rfc3339()),
+        limit: 9999,
+    }).await;
+    match result {
+        Ok(metrics) => {
+            for metric in metrics {
+                all_metrics.push(metric);
+            }
+        },
+        Err(e) => {
+            console_log!("Querying Cloudflare API failed: {:?}", e);
+            return Err(Error::JsError(e.to_string()));
+        }
+    };
+
+    let result = do_get_queue_backlog_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_queue_backlog_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
         datetime_start: Some(start.to_rfc3339()),
         datetime_end: Some(end.to_rfc3339()),

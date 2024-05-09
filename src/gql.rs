@@ -36,14 +36,14 @@ pub struct GetD1AnalyticsQuery;
 )]
 pub struct GetDurableObjectsAnalyticsQuery;
 
-// #[derive(GraphQLQuery)]
-// #[graphql(
-//     schema_path = "gql/schema.graphql",
-//     query_path = "gql/queries.graphql",
-//     variables_derives = "Debug",
-//     response_derives = "Debug,Clone"
-// )]
-// pub struct GetQueueAnalyticsQuery;
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
+    query_path = "gql/queue_backlog_query.graphql",
+    variables_derives = "Debug",
+    response_derives = "Debug,Clone"
+)]
+pub struct GetQueueBacklogAnalyticsQuery;
 
 #[allow(non_camel_case_types)]
 type float32 = f32;
@@ -282,6 +282,64 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
 }
+
+pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_backlog_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetQueueBacklogAnalyticsQuery::build_query(variables);
+    //console_log!("request_body: {:?}", request_body);
+    let client = reqwest::Client::new();
+    let res = client.post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body).send().await?;
+
+    if !res.status().is_success() {
+        console_log!("GraphQL query failed: {:?}", res.status());
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_body: Response<get_queue_backlog_analytics_query::ResponseData> = res.json().await?;
+    if response_body.errors.is_some() {
+        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_queue_backlog_analytics_query::ResponseData = response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let queue_backlog_bytes_opts = Opts::new("cloudflare_queue_backlog_bytes", "The average size of the backlog in bytes for sample interval");
+    let queue_backlog_bytes = GaugeVec::new(queue_backlog_bytes_opts, &["queue_id"]).unwrap();
+    registry.register(Box::new(queue_backlog_bytes.clone())).unwrap();
+
+    let queue_backlog_messages_opts = Opts::new("cloudflare_queue_backlog_messages", "The average number of messages in the backlog for sample interval");
+    let queue_backlog_messages = GaugeVec::new(queue_backlog_messages_opts, &["queue_id"]).unwrap();
+    registry.register(Box::new(queue_backlog_messages.clone())).unwrap();
+
+    let queue_backlog_sample_interval_opts = Opts::new("cloudflare_queue_backlog_sample_interval", "The average value used for sample interval");
+    let queue_backlog_sample_interval = GaugeVec::new(queue_backlog_sample_interval_opts, &["queue_id"]).unwrap();
+    registry.register(Box::new(queue_backlog_sample_interval.clone())).unwrap();
+
+    let mut last_datetime: Option<Time> = None;
+    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+        for group in account.queue_backlog_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            last_datetime = Some(dimensions.datetime_minute.clone());
+            let queue_id = dimensions.queue_id.clone();
+            let avg = group.avg.as_ref().unwrap();
+
+            queue_backlog_bytes.with_label_values(&[queue_id.as_str()]).set(avg.bytes as f64);
+            queue_backlog_messages.with_label_values(&[queue_id.as_str()]).set(avg.messages as f64);
+            queue_backlog_sample_interval.with_label_values(&[queue_id.as_str()]).set(avg.sample_interval as f64);
+        }
+    }
+
+    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
+        datetime.and_utc().into()
+    }).unwrap_or_else(|| {
+        to_std_systemtime(SystemTime::now())
+    });
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+}
+
 
 fn to_std_systemtime(time: web_time::SystemTime) -> std::time::SystemTime {
     let duration = time.duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap();
