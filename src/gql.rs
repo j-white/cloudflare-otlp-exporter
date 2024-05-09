@@ -12,45 +12,35 @@ use worker::console_log;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/workers_query.graphql",
-    variables_derives = "Debug",
-    response_derives = "Debug,Clone"
+    query_path = "gql/workers_query.graphql"
 )]
 pub struct GetWorkersAnalyticsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/d1_query.graphql",
-    variables_derives = "Debug",
-    response_derives = "Debug,Clone"
+    query_path = "gql/d1_query.graphql"
 )]
 pub struct GetD1AnalyticsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/durableobjects_query.graphql",
-    variables_derives = "Debug",
-    response_derives = "Debug,Clone"
+    query_path = "gql/durableobjects_query.graphql"
 )]
 pub struct GetDurableObjectsAnalyticsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/queue_backlog_query.graphql",
-    variables_derives = "Debug",
-    response_derives = "Debug,Clone"
+    query_path = "gql/queue_backlog_query.graphql"
 )]
 pub struct GetQueueBacklogAnalyticsQuery;
 
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
-    query_path = "gql/queue_operations_query.graphql",
-    variables_derives = "Debug",
-    response_derives = "Debug,Clone"
+    query_path = "gql/queue_operations_query.graphql"
 )]
 pub struct GetQueueOperationsAnalyticsQuery;
 
@@ -110,7 +100,7 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
     registry.register(Box::new(worker_duration.clone())).unwrap();
 
     let mut last_datetime: Option<Time> = None;
-    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+    for account in response_data.viewer.unwrap().accounts.iter() {
         for worker in account.workers_invocations_adaptive.iter() {
             let dimensions = worker.dimensions.as_ref().unwrap();
             last_datetime = Some(dimensions.datetime.clone());
@@ -187,7 +177,7 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
     registry.register(Box::new(d1_query_batch_time_ms.clone())).unwrap();
 
     let mut last_datetime: Option<Time> = None;
-    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+    for account in response_data.viewer.unwrap().accounts.iter() {
         for group in account.d1_analytics_adaptive_groups.iter() {
             let dimensions = group.dimensions.as_ref().unwrap();
             last_datetime = Some(dimensions.datetime_minute.clone());
@@ -255,7 +245,7 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
     registry.register(Box::new(do_wall_time_microseconds.clone())).unwrap();
 
     let mut last_datetime: Option<Time> = None;
-    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+    for account in response_data.viewer.unwrap().accounts.iter() {
         for group in account.durable_objects_invocations_adaptive_groups.iter() {
             let dimensions = group.dimensions.as_ref().unwrap();
             last_datetime = Some(dimensions.datetime_minute.clone());
@@ -326,7 +316,7 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
     registry.register(Box::new(queue_backlog_sample_interval.clone())).unwrap();
 
     let mut last_datetime: Option<Time> = None;
-    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+    for account in response_data.viewer.unwrap().accounts.iter() {
         for group in account.queue_backlog_adaptive_groups.iter() {
             let dimensions = group.dimensions.as_ref().unwrap();
             last_datetime = Some(dimensions.datetime_minute.clone());
@@ -387,7 +377,7 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
     registry.register(Box::new(queue_sample_interval.clone())).unwrap();
 
     let mut last_datetime: Option<Time> = None;
-    for account in response_data.clone().viewer.unwrap().accounts.iter() {
+    for account in response_data.viewer.unwrap().accounts.iter() {
         for group in account.queue_message_operations_adaptive_groups.iter() {
             let dimensions = group.dimensions.as_ref().unwrap();
             last_datetime = Some(dimensions.datetime.clone());
