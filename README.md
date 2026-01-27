@@ -13,7 +13,7 @@ By running it as a worker and pushing metrics, we avoid the need to deploy a ded
 - [x] D1
 - [x] Durable Objects
 - [x] Queues
-- [ ] Zones
+- [x] Zones
 
 ## Usage
 

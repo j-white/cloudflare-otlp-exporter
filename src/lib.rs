@@ -7,7 +7,7 @@ use prost::Message;
 use worker::*;
 use worker::js_sys::Uint8Array;
 use worker::wasm_bindgen::JsValue;
-use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query, do_get_durableobjects_analytics_query, get_durable_objects_analytics_query, do_get_queue_backlog_analytics_query, get_queue_backlog_analytics_query, do_get_queue_operations_analytics_query, get_queue_operations_analytics_query};
+use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query, do_get_durableobjects_analytics_query, get_durable_objects_analytics_query, do_get_queue_backlog_analytics_query, get_queue_backlog_analytics_query, do_get_queue_operations_analytics_query, get_queue_operations_analytics_query, do_get_zone_http_requests_query, get_zone_http_requests_query};
 
 mod gql;
 mod metrics;
@@ -156,6 +156,36 @@ async fn do_trigger(env: Env) -> Result<()> {
             return Err(Error::JsError(e.to_string()));
         }
     };
+
+    // Zone HTTP requests metrics (optional - only if CLOUDFLARE_ZONE_IDS is set)
+    if let Ok(zone_ids_var) = env.var("CLOUDFLARE_ZONE_IDS") {
+        let zone_ids: Vec<String> = zone_ids_var.to_string()
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+
+        if !zone_ids.is_empty() {
+            let result = do_get_zone_http_requests_query(&cloudflare_api_url, &cloudflare_api_key, get_zone_http_requests_query::Variables {
+                zone_i_ds: Some(zone_ids),
+                datetime_start: start.to_rfc3339(),
+                datetime_end: end.to_rfc3339(),
+                limit: 9999,
+            }).await;
+            match result {
+                Ok(metrics) => {
+                    for metric in metrics {
+                        all_metrics.push(metric);
+                    }
+                },
+                Err(e) => {
+                    console_log!("Querying Cloudflare API for zone HTTP requests failed: {:?}", e);
+                    return Err(Error::JsError(e.to_string()));
+                }
+            };
+        }
+    }
+
     console_log!("Done fetching!");
 
     do_push_metrics(env, all_metrics).await

@@ -44,6 +44,13 @@ pub struct GetQueueBacklogAnalyticsQuery;
 )]
 pub struct GetQueueOperationsAnalyticsQuery;
 
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
+    query_path = "gql/zone_http_requests_query.graphql"
+)]
+pub struct GetZoneHttpRequestsQuery;
+
 #[allow(non_camel_case_types)]
 type float32 = f32;
 
@@ -61,6 +68,9 @@ type uint32 = u32;
 
 #[allow(non_camel_case_types)]
 type float64 = f64;
+
+#[allow(non_camel_case_types)]
+type uint16 = u16;
 
 pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_workers_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetWorkersAnalyticsQuery::build_query(variables);
@@ -398,6 +408,53 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
                 queue_id.as_str(), outcome.as_str()]).set(avg.retry_count as f64);
             queue_sample_interval.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
                 queue_id.as_str(), outcome.as_str()]).set(avg.sample_interval);
+        }
+    }
+
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
+    }).unwrap_or_else(|| {
+        systemtime_to_nanos(SystemTime::now())
+    });
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
+}
+
+pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_zone_http_requests_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetZoneHttpRequestsQuery::build_query(variables);
+    let client = reqwest::Client::new();
+    let res = client.post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body).send().await?;
+
+    if !res.status().is_success() {
+        console_log!("GraphQL query failed: {:?}", res.status());
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_body: Response<get_zone_http_requests_query::ResponseData> = res.json().await?;
+    if response_body.errors.is_some() {
+        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_zone_http_requests_query::ResponseData = response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let zone_requests_status_host_opts = Opts::new("cloudflare_zone_requests_status_host", "Count of requests per edge HTTP status per host");
+    let zone_requests_status_host = CounterVec::new(zone_requests_status_host_opts, &["zone", "status", "host"]).unwrap();
+    registry.register(Box::new(zone_requests_status_host.clone())).unwrap();
+
+    let last_datetime: Option<Time> = None;
+    for zone in response_data.viewer.unwrap().zones.iter() {
+        let zone_tag = zone.zone_tag.clone();
+        for group in zone.http_requests_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            let status = dimensions.edge_response_status.to_string();
+            let host = dimensions.client_request_http_host.clone();
+            let count = group.count;
+
+            zone_requests_status_host.with_label_values(&[zone_tag.as_str(), status.as_str(), host.as_str()]).inc_by(count as f64);
         }
     }
 

@@ -1,0 +1,18 @@
+query GetZoneHttpRequestsQuery($zoneIDs: [String!], $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
+  viewer {
+    zones(filter: { zoneTag_in: $zoneIDs }) {
+      zoneTag
+      httpRequestsAdaptiveGroups(limit: $limit, filter: {
+        datetime_geq: $datetimeStart,
+        datetime_lt: $datetimeEnd,
+        requestSource_in: ["eyeball"]
+      }) {
+        count
+        dimensions {
+          edgeResponseStatus
+          clientRequestHTTPHost
+        }
+      }
+    }
+  }
+}

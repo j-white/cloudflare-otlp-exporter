@@ -1,0 +1,75 @@
+{
+  "data": {
+    "viewer": {
+      "zones": [
+        {
+          "zoneTag": "zone123abc",
+          "httpRequestsAdaptiveGroups": [
+            {
+              "count": 150,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "example.com"
+              }
+            },
+            {
+              "count": 25,
+              "dimensions": {
+                "edgeResponseStatus": 304,
+                "clientRequestHTTPHost": "example.com"
+              }
+            },
+            {
+              "count": 10,
+              "dimensions": {
+                "edgeResponseStatus": 404,
+                "clientRequestHTTPHost": "example.com"
+              }
+            },
+            {
+              "count": 5,
+              "dimensions": {
+                "edgeResponseStatus": 500,
+                "clientRequestHTTPHost": "example.com"
+              }
+            },
+            {
+              "count": 80,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "api.example.com"
+              }
+            },
+            {
+              "count": 3,
+              "dimensions": {
+                "edgeResponseStatus": 401,
+                "clientRequestHTTPHost": "api.example.com"
+              }
+            }
+          ]
+        },
+        {
+          "zoneTag": "zone456def",
+          "httpRequestsAdaptiveGroups": [
+            {
+              "count": 200,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "myapp.io"
+              }
+            },
+            {
+              "count": 15,
+              "dimensions": {
+                "edgeResponseStatus": 503,
+                "clientRequestHTTPHost": "myapp.io"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "errors": null
+}
