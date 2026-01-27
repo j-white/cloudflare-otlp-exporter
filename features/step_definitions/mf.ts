@@ -53,7 +53,7 @@ export class MiniflareDriver {
             kvPersist: false,
             r2Persist: false,
             workers: [{
-                scriptPath: "./build/worker/shim.mjs",
+                scriptPath: "./build/index.js",
                 compatibilityDate: "2022-04-05",
                 cache: true,
                 modules: true,

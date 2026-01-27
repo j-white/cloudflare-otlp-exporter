@@ -1,10 +1,10 @@
 use std::error::Error;
+use chrono::NaiveDateTime;
 use graphql_client::{GraphQLQuery, Response};
-use opentelemetry_sdk::metrics::data::Metric;
+use opentelemetry_proto::tonic::metrics::v1::Metric;
 use prometheus::{CounterVec, GaugeVec, Opts, Registry};
 use crate::metrics::prometheus_registry_to_opentelemetry_metrics;
 use web_time::SystemTime;
-use chrono::NaiveDateTime;
 use worker::console_log;
 
 // The paths are relative to the directory where your `Cargo.toml` is located.
@@ -121,14 +121,14 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
         }
     }
 
-    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
-        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
-        datetime.and_utc().into()
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
     }).unwrap_or_else(|| {
-        to_std_systemtime(SystemTime::now())
+        systemtime_to_nanos(SystemTime::now())
     });
 
-    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
 pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_d1_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
@@ -190,21 +190,21 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
             d1_rows_written.with_label_values(&[database_id.as_str()]).inc_by(sum.rows_written as f64);
             d1_write_queries.with_label_values(&[database_id.as_str()]).inc_by(sum.write_queries as f64);
 
-            d1_query_batch_response_bytes.with_label_values(&[database_id.as_str(), "P50"]).set(quantiles.query_batch_response_bytes_p50 as f64);
-            d1_query_batch_response_bytes.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_response_bytes_p90 as f64);
-            d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P50"]).set(quantiles.query_batch_time_ms_p50 as f64);
-            d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_time_ms_p90 as f64);
+            d1_query_batch_response_bytes.with_label_values(&[database_id.as_str(), "P50"]).set(quantiles.query_batch_response_bytes_p50);
+            d1_query_batch_response_bytes.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_response_bytes_p90);
+            d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P50"]).set(quantiles.query_batch_time_ms_p50);
+            d1_query_batch_time_ms.with_label_values(&[database_id.as_str(), "P90"]).set(quantiles.query_batch_time_ms_p90);
         }
     }
 
-    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
-        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
-        datetime.and_utc().into()
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
     }).unwrap_or_else(|| {
-        to_std_systemtime(SystemTime::now())
+        systemtime_to_nanos(SystemTime::now())
     });
 
-    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
 pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_durable_objects_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
@@ -272,14 +272,14 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
         }
     }
 
-    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
-        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
-        datetime.and_utc().into()
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
     }).unwrap_or_else(|| {
-        to_std_systemtime(SystemTime::now())
+        systemtime_to_nanos(SystemTime::now())
     });
 
-    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
 pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_backlog_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
@@ -325,18 +325,18 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
 
             queue_backlog_bytes.with_label_values(&[queue_id.as_str()]).set(avg.bytes as f64);
             queue_backlog_messages.with_label_values(&[queue_id.as_str()]).set(avg.messages as f64);
-            queue_backlog_sample_interval.with_label_values(&[queue_id.as_str()]).set(avg.sample_interval as f64);
+            queue_backlog_sample_interval.with_label_values(&[queue_id.as_str()]).set(avg.sample_interval);
         }
     }
 
-    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
-        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
-        datetime.and_utc().into()
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
     }).unwrap_or_else(|| {
-        to_std_systemtime(SystemTime::now())
+        systemtime_to_nanos(SystemTime::now())
     });
 
-    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
 pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_operations_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
@@ -397,21 +397,21 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
             queue_retry_count.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
                 queue_id.as_str(), outcome.as_str()]).set(avg.retry_count as f64);
             queue_sample_interval.with_label_values(&[action_type.as_str(), consumer_type.as_str(),
-                queue_id.as_str(), outcome.as_str()]).set(avg.sample_interval as f64);
+                queue_id.as_str(), outcome.as_str()]).set(avg.sample_interval);
         }
     }
 
-    let timestamp: std::time::SystemTime = last_datetime.map(|datetime| {
-        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&*datetime, "%+").unwrap();
-        datetime.and_utc().into()
+    let timestamp_nanos: u64 = last_datetime.map(|datetime| {
+        let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+        datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
     }).unwrap_or_else(|| {
-        to_std_systemtime(SystemTime::now())
+        systemtime_to_nanos(SystemTime::now())
     });
 
-    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp))
+    Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-fn to_std_systemtime(time: web_time::SystemTime) -> std::time::SystemTime {
+fn systemtime_to_nanos(time: web_time::SystemTime) -> u64 {
     let duration = time.duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap();
-    std::time::SystemTime::UNIX_EPOCH + duration
+    duration.as_nanos() as u64
 }

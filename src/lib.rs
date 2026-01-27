@@ -1,8 +1,7 @@
-use std::env;
 use chrono::SubsecRound;
 use opentelemetry_proto::tonic::collector::metrics::v1::ExportMetricsServiceRequest;
-use opentelemetry_sdk::metrics::data::{Metric, ResourceMetrics, ScopeMetrics};
-use opentelemetry_sdk::Resource;
+use opentelemetry_proto::tonic::common::v1::InstrumentationScope;
+use opentelemetry_proto::tonic::metrics::v1::{Metric, ResourceMetrics, ScopeMetrics};
 use prost::Message;
 
 use worker::*;
@@ -20,7 +19,7 @@ pub async fn do_fetch(
     data: Option<JsValue>,
     content_type: String
 ) -> Result<Response> {
-    let mut http_headers = Headers::new();
+    let http_headers = Headers::new();
     // split headers by command, and then by =
     for header in headers.split(",") {
         let parts: Vec<&str> = header.splitn(2, "=").collect();
@@ -30,7 +29,7 @@ pub async fn do_fetch(
             http_headers.set(key, value).expect("failed to construct header");
         }
     }
-    http_headers.set("Content-Type", &*content_type).expect("failed to construct content-type header");
+    http_headers.set("Content-Type", &content_type).expect("failed to construct content-type header");
     let mut init = RequestInit::new();
     init.method = Method::Post;
     init.with_body(data).with_headers(http_headers);
@@ -169,38 +168,39 @@ async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
         Err(_) => String::from(""),
     };
     let otlp_encoding_json: bool = match env.var("OTLP_ENCODING") {
-        Ok(val) => match val.to_string().to_lowercase().as_str() {
-            "json" => true,
-            _ => false,
-        }
+        Ok(val) => matches!(val.to_string().to_lowercase().as_str(), "json"),
         Err(_) => false,
     };
 
     console_log!("Converting metrics to OTLP.");
-    let library = opentelemetry::InstrumentationLibrary::new(
-        "cloudflare-otlp-exporter",
-        Some(env!("CARGO_PKG_VERSION")),
-        Some("https://github.com/j-white/cloudflare-otlp-exporter/v1.0.0"),
-        None,
-    );
+    let scope = InstrumentationScope {
+        name: "cloudflare-otlp-exporter".to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        attributes: vec![],
+        dropped_attributes_count: 0,
+    };
     let scope_metrics = ScopeMetrics {
-        scope: library,
-        metrics
+        scope: Some(scope),
+        metrics,
+        schema_url: "https://github.com/j-white/cloudflare-otlp-exporter/v1.0.0".to_string(),
     };
     let resource_metrics = ResourceMetrics {
-        resource: Resource::empty(),
+        resource: None,
         scope_metrics: vec![scope_metrics],
+        schema_url: String::new(),
     };
 
-    let metrics = ExportMetricsServiceRequest::from(&resource_metrics);
+    let export_request = ExportMetricsServiceRequest {
+        resource_metrics: vec![resource_metrics],
+    };
     let js_value: JsValue;
     let content_type: String;
     if otlp_encoding_json {
-        let metrics_json = serde_json::to_string(&metrics).unwrap();
+        let metrics_json = serde_json::to_string(&export_request).unwrap();
         js_value = JsValue::from_str(&metrics_json);
         content_type = "application/json".to_string();
     } else {
-        let bytes = metrics.encode_to_vec();
+        let bytes = export_request.encode_to_vec();
         let array = Uint8Array::from(bytes.as_slice());
         js_value = JsValue::from(array);
         content_type = "application/x-protobuf".to_string();
@@ -208,12 +208,12 @@ async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
     console_log!("Done converting metrics to OTLP.");
 
     console_log!("Posting metrics to OTLP endpoint.");
-    let mut res = do_fetch(metrics_url, otlp_headers, Some(js_value).into(), content_type).await?;
+    let mut res = do_fetch(metrics_url, otlp_headers, Some(js_value), content_type).await?;
     let body = res.text().await?;
     console_log!("Done posting metrics status={} body={:?}", res.status_code(), body);
 
     if res.status_code() != 200 {
         return Err(Error::JsError(body));
     }
-    return Ok(());
+    Ok(())
 }

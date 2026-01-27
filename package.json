@@ -6,22 +6,22 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --env dev",
-    "cucumber": "cucumber-js",
+    "cucumber": "tsx node_modules/.bin/cucumber-js",
     "schema": "env-cmd -x get-graphql-schema -h 'Authorization=Bearer $CF_ANALYTICS_API_KEY' https://api.cloudflare.com/client/v4/graphql > gql/schema.graphql"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240405.0",
-    "@cucumber/cucumber": "^10.4.0",
+    "@cloudflare/workers-types": "^4.20260127.0",
+    "@cucumber/cucumber": "^12.1.0",
     "@cucumber/pretty-formatter": "^1.0.1",
-    "@opentelemetry/otlp-transformer": "^0.49.1",
-    "@types/chai": "^4.3.14",
-    "@types/ws": "^8.5.10",
-    "chai": "^4.3.0",
-    "miniflare": "^3.20240405.2",
-    "npm-check-updates": "^16.14.18",
-    "ts-node": "^10.9.2",
-    "env-cmd": "^10.1.0",
+    "@opentelemetry/otlp-transformer": "^0.211.0",
+    "@types/chai": "^5.2.3",
+    "@types/ws": "^8.18.1",
+    "chai": "^6.2.2",
+    "env-cmd": "^11.0.0",
     "get-graphql-schema": "^2.1.2",
-    "wrangler": "^3.53.1"
+    "npm-check-updates": "^19.3.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "wrangler": "^4.61.0"
   }
 }

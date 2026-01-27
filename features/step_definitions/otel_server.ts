@@ -1,5 +1,5 @@
 import http from 'http';
-import {IExportMetricsServiceRequest, IResourceMetrics} from "@opentelemetry/otlp-transformer";
+import {IExportMetricsServiceRequest, IResourceMetrics} from "@opentelemetry/otlp-transformer/build/src/metrics/internal-types";
 import {AddressInfo} from "net";
 
 export class OpenTelemetryServer {
