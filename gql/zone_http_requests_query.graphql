@@ -12,6 +12,11 @@ query GetZoneHttpRequestsQuery($zoneIDs: [String!], $datetimeStart: Time!, $date
           edgeResponseStatus
           clientRequestHTTPHost
         }
+        quantiles {
+          edgeTimeToFirstByteMsP50
+          edgeTimeToFirstByteMsP95
+          edgeTimeToFirstByteMsP99
+        }
       }
     }
   }

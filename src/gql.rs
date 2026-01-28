@@ -445,6 +445,10 @@ pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudf
     let zone_requests_status_host = CounterVec::new(zone_requests_status_host_opts, &["zone", "status", "host"]).unwrap();
     registry.register(Box::new(zone_requests_status_host.clone())).unwrap();
 
+    let zone_ttfb_opts = Opts::new("cloudflare_zone_edge_ttfb_ms", "Edge Time To First Byte - milliseconds");
+    let zone_ttfb = GaugeVec::new(zone_ttfb_opts, &["zone", "host", "quantile"]).unwrap();
+    registry.register(Box::new(zone_ttfb.clone())).unwrap();
+
     let last_datetime: Option<Time> = None;
     for zone in response_data.viewer.unwrap().zones.iter() {
         let zone_tag = zone.zone_tag.clone();
@@ -455,6 +459,15 @@ pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudf
             let count = group.count;
 
             zone_requests_status_host.with_label_values(&[zone_tag.as_str(), status.as_str(), host.as_str()]).inc_by(count as f64);
+
+            if let Some(quantiles) = &group.quantiles {
+                zone_ttfb.with_label_values(&[zone_tag.as_str(), host.as_str(), "P50"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p50);
+                zone_ttfb.with_label_values(&[zone_tag.as_str(), host.as_str(), "P95"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p95);
+                zone_ttfb.with_label_values(&[zone_tag.as_str(), host.as_str(), "P99"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p99);
+            }
         }
     }
 
