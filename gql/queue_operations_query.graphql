@@ -1,4 +1,4 @@
-query GetQueueOperationsAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+query GetQueueOperationsAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
     viewer {
         accounts(filter: {accountTag: $accountTag}) {
             queueMessageOperationsAdaptiveGroups(limit: $limit, filter: {

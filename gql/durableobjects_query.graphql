@@ -1,4 +1,4 @@
-query GetDurableObjectsAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+query GetDurableObjectsAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
     viewer {
         accounts(filter: {accountTag: $accountTag}) {
             durableObjectsInvocationsAdaptiveGroups(limit: $limit, filter: {

@@ -69,8 +69,8 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     let result = do_get_workers_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_workers_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
+        datetime_start: start.to_rfc3339(),
+        datetime_end: end.to_rfc3339(),
         limit: 9999,
     }).await;
     match result {
@@ -87,8 +87,8 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     let result = do_get_d1_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_d1_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
+        datetime_start: start.to_rfc3339(),
+        datetime_end: end.to_rfc3339(),
         limit: 9999,
     }).await;
     match result {
@@ -105,8 +105,8 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     let result = do_get_durableobjects_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_durable_objects_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
+        datetime_start: start.to_rfc3339(),
+        datetime_end: end.to_rfc3339(),
         limit: 9999,
     }).await;
     match result {
@@ -123,8 +123,8 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     let result = do_get_queue_backlog_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_queue_backlog_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
+        datetime_start: start.to_rfc3339(),
+        datetime_end: end.to_rfc3339(),
         limit: 9999,
     }).await;
     match result {
@@ -141,8 +141,8 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     let result = do_get_queue_operations_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_queue_operations_analytics_query::Variables {
         account_tag: cloudflare_account_id.clone(),
-        datetime_start: Some(start.to_rfc3339()),
-        datetime_end: Some(end.to_rfc3339()),
+        datetime_start: start.to_rfc3339(),
+        datetime_end: end.to_rfc3339(),
         limit: 9999,
     }).await;
     match result {
@@ -223,6 +223,11 @@ async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
     let export_request = ExportMetricsServiceRequest {
         resource_metrics: vec![resource_metrics],
     };
+
+    // Log the OTLP payload as JSON for debugging
+    let metrics_json_for_logging = serde_json::to_string_pretty(&export_request).unwrap();
+    console_log!("OTLP metrics payload:\n{}", metrics_json_for_logging);
+
     let js_value: JsValue;
     let content_type: String;
     if otlp_encoding_json {

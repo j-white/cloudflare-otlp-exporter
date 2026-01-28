@@ -30,8 +30,7 @@ fn to_attributes(labels: &[LabelPair]) -> Vec<KeyValue> {
 }
 
 fn get_otlp_name_and_unit_from_prom_name(name: &str) -> (String, String) {
-    let (otlp_name, unit) = name.rsplit_once('_').unwrap();
-    (otlp_name.to_string(), unit.to_string())
+    (name.to_string(), String::new())
 }
 
 fn create_metric_prom(metric_family: &MetricFamily, timestamp_nanos: u64) -> Metric {

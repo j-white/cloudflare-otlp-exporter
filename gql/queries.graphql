@@ -1,4 +1,4 @@
-query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+query GetQueueAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
   viewer {
     accounts(filter: {accountTag: $accountTag}) {
       queueConsumerMetricsAdaptiveGroups(limit: $limit, filter: {

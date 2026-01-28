@@ -74,20 +74,22 @@ type uint16 = u16;
 
 pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_workers_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetWorkersAnalyticsQuery::build_query(variables);
-    //console_log!("request_body: {:?}", request_body);
+    console_log!("[Workers] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[Workers] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_workers_analytics_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[Workers] GraphQL response: {}", response_text);
+    let response_body: Response<get_workers_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[Workers] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_workers_analytics_query::ResponseData = response_body.data.expect("missing response data");
@@ -143,20 +145,22 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
 
 pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_d1_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetD1AnalyticsQuery::build_query(variables);
-    //console_log!("request_body: {:?}", request_body);
+    console_log!("[D1] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[D1] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_d1_analytics_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[D1] GraphQL response: {}", response_text);
+    let response_body: Response<get_d1_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[D1] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_d1_analytics_query::ResponseData = response_body.data.expect("missing response data");
@@ -219,20 +223,22 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
 
 pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_durable_objects_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetDurableObjectsAnalyticsQuery::build_query(variables);
-    //console_log!("request_body: {:?}", request_body);
+    console_log!("[DurableObjects] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[DurableObjects] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_durable_objects_analytics_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[DurableObjects] GraphQL response: {}", response_text);
+    let response_body: Response<get_durable_objects_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[DurableObjects] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_durable_objects_analytics_query::ResponseData = response_body.data.expect("missing response data");
@@ -294,20 +300,22 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
 
 pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_backlog_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetQueueBacklogAnalyticsQuery::build_query(variables);
-    //console_log!("request_body: {:?}", request_body);
+    console_log!("[QueueBacklog] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[QueueBacklog] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_queue_backlog_analytics_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[QueueBacklog] GraphQL response: {}", response_text);
+    let response_body: Response<get_queue_backlog_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[QueueBacklog] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_queue_backlog_analytics_query::ResponseData = response_body.data.expect("missing response data");
@@ -351,27 +359,29 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
 
 pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_operations_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetQueueOperationsAnalyticsQuery::build_query(variables);
-    //console_log!("request_body: {:?}", request_body);
+    console_log!("[QueueOperations] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[QueueOperations] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_queue_operations_analytics_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[QueueOperations] GraphQL response: {}", response_text);
+    let response_body: Response<get_queue_operations_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[QueueOperations] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_queue_operations_analytics_query::ResponseData = response_body.data.expect("missing response data");
 
     let registry = Registry::new();
     let queue_billable_opts = Opts::new("cloudflare_queue_operations_billable", "Number of Billable Operations (some message operations count as multiple billable operations)");
-    let queue_billable = CounterVec::new(queue_billable_opts, &["queue_id"]).unwrap();
+    let queue_billable = CounterVec::new(queue_billable_opts, &["action_type", "consumer_type", "queue_id", "outcome"]).unwrap();
     registry.register(Box::new(queue_billable.clone())).unwrap();
 
     let queue_lag_time_ms_opts = Opts::new("cloudflare_queue_operations_lag_time_ms", "The average time in milliseconds between when the message was written to the queue and the current operation over the sample interval. Will always be 0 for WriteMessage operations.");
@@ -423,19 +433,22 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
 
 pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_zone_http_requests_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetZoneHttpRequestsQuery::build_query(variables);
+    console_log!("[ZoneHttpRequests] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
         .json(&request_body).send().await?;
 
     if !res.status().is_success() {
-        console_log!("GraphQL query failed: {:?}", res.status());
+        console_log!("[ZoneHttpRequests] GraphQL query failed: {:?}", res.status());
         return Err(Box::new(res.error_for_status().unwrap_err()));
     }
 
-    let response_body: Response<get_zone_http_requests_query::ResponseData> = res.json().await?;
+    let response_text = res.text().await?;
+    console_log!("[ZoneHttpRequests] GraphQL response: {}", response_text);
+    let response_body: Response<get_zone_http_requests_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
-        console_log!("GraphQL query failed: {:?}", response_body.errors);
+        console_log!("[ZoneHttpRequests] GraphQL query failed: {:?}", response_body.errors);
         return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
     }
     let response_data: get_zone_http_requests_query::ResponseData = response_body.data.expect("missing response data");

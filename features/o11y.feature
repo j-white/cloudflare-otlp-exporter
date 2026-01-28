@@ -4,5 +4,5 @@ Feature: OpenTelemetry metrics
     Given Worker is configured to send metrics to a mock OpenTelemetry collector
     When  Worker is triggered
     Then  Worker metrics are published
-    And   Metric name should include "cloudflare_worker"
-    And   Metric name should include "cloudflare_worker_cpu"
+    And   Metric name should include "cloudflare_worker_duration"
+    And   Metric name should include "cloudflare_worker_cpu_time"

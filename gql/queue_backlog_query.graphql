@@ -1,4 +1,4 @@
-query GetQueueBacklogAnalyticsQuery($accountTag: string!, $datetimeStart: Time, $datetimeEnd: Time, $limit: Int!) {
+query GetQueueBacklogAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
     viewer {
         accounts(filter: {accountTag: $accountTag}) {
             queueBacklogAdaptiveGroups(limit: $limit, filter: {
