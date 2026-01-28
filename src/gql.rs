@@ -4,7 +4,6 @@ use graphql_client::{GraphQLQuery, Response};
 use opentelemetry_proto::tonic::metrics::v1::Metric;
 use prometheus::{CounterVec, GaugeVec, Opts, Registry};
 use crate::metrics::prometheus_registry_to_opentelemetry_metrics;
-use web_time::SystemTime;
 use worker::console_log;
 
 // The paths are relative to the directory where your `Cargo.toml` is located.
@@ -72,9 +71,11 @@ type float64 = f64;
 #[allow(non_camel_case_types)]
 type uint16 = u16;
 
-pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_workers_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_workers_analytics_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetWorkersAnalyticsQuery::build_query(variables);
-    console_log!("[Workers] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[Workers] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -86,7 +87,9 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
     }
 
     let response_text = res.text().await?;
-    console_log!("[Workers] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[Workers] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_workers_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[Workers] GraphQL query failed: {:?}", response_body.errors);
@@ -111,6 +114,14 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
     let worker_duration = GaugeVec::new(worker_duration_opts, &["script_name", "quantile"]).unwrap();
     registry.register(Box::new(worker_duration.clone())).unwrap();
 
+    let worker_wall_time_opts = Opts::new("cloudflare_worker_wall_time", "Sum of wall time - microseconds");
+    let worker_wall_time = CounterVec::new(worker_wall_time_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(worker_wall_time.clone())).unwrap();
+
+    let worker_subrequests_opts = Opts::new("cloudflare_worker_subrequests", "Sum of subrequests");
+    let worker_subrequests = CounterVec::new(worker_subrequests_opts, &["script_name"]).unwrap();
+    registry.register(Box::new(worker_subrequests.clone())).unwrap();
+
     let mut last_datetime: Option<Time> = None;
     for account in response_data.viewer.unwrap().accounts.iter() {
         for worker in account.workers_invocations_adaptive.iter() {
@@ -122,6 +133,8 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
 
             worker_requests.with_label_values(&[script_name.as_str()]).inc_by(sum.requests as f64);
             worker_errors.with_label_values(&[script_name.as_str()]).inc_by(sum.errors as f64);
+            worker_wall_time.with_label_values(&[script_name.as_str()]).inc_by(sum.wall_time as f64);
+            worker_subrequests.with_label_values(&[script_name.as_str()]).inc_by(sum.subrequests as f64);
             worker_cpu_time.with_label_values(&[script_name.as_str(), "P50"]).set(quantiles.cpu_time_p50 as f64);
             worker_cpu_time.with_label_values(&[script_name.as_str(), "P75"]).set(quantiles.cpu_time_p75 as f64);
             worker_cpu_time.with_label_values(&[script_name.as_str(), "P99"]).set(quantiles.cpu_time_p99 as f64);
@@ -136,16 +149,16 @@ pub async fn do_get_workers_analytics_query(cloudflare_api_url: &String, cloudfl
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_d1_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_d1_analytics_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetD1AnalyticsQuery::build_query(variables);
-    console_log!("[D1] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[D1] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -157,7 +170,9 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
     }
 
     let response_text = res.text().await?;
-    console_log!("[D1] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[D1] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_d1_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[D1] GraphQL query failed: {:?}", response_body.errors);
@@ -214,16 +229,16 @@ pub async fn do_get_d1_analytics_query(cloudflare_api_url: &String, cloudflare_a
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_durable_objects_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_durable_objects_analytics_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetDurableObjectsAnalyticsQuery::build_query(variables);
-    console_log!("[DurableObjects] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[DurableObjects] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -235,7 +250,9 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
     }
 
     let response_text = res.text().await?;
-    console_log!("[DurableObjects] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[DurableObjects] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_durable_objects_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[DurableObjects] GraphQL query failed: {:?}", response_body.errors);
@@ -291,16 +308,16 @@ pub async fn do_get_durableobjects_analytics_query(cloudflare_api_url: &String, 
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_backlog_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_backlog_analytics_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetQueueBacklogAnalyticsQuery::build_query(variables);
-    console_log!("[QueueBacklog] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[QueueBacklog] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -312,7 +329,9 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
     }
 
     let response_text = res.text().await?;
-    console_log!("[QueueBacklog] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[QueueBacklog] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_queue_backlog_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[QueueBacklog] GraphQL query failed: {:?}", response_body.errors);
@@ -350,16 +369,16 @@ pub async fn do_get_queue_backlog_analytics_query(cloudflare_api_url: &String, c
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_operations_analytics_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_queue_operations_analytics_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetQueueOperationsAnalyticsQuery::build_query(variables);
-    console_log!("[QueueOperations] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[QueueOperations] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -371,7 +390,9 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
     }
 
     let response_text = res.text().await?;
-    console_log!("[QueueOperations] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[QueueOperations] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_queue_operations_analytics_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[QueueOperations] GraphQL query failed: {:?}", response_body.errors);
@@ -424,16 +445,16 @@ pub async fn do_get_queue_operations_analytics_query(cloudflare_api_url: &String
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_zone_http_requests_query::Variables) -> Result<Vec<Metric>, Box<dyn Error>> {
+pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudflare_api_key: &String, variables: get_zone_http_requests_query::Variables, debug_logging: bool, fallback_timestamp_nanos: u64) -> Result<Vec<Metric>, Box<dyn Error>> {
     let request_body = GetZoneHttpRequestsQuery::build_query(variables);
-    console_log!("[ZoneHttpRequests] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    if debug_logging {
+        console_log!("[ZoneHttpRequests] GraphQL request: {}", serde_json::to_string_pretty(&request_body).unwrap_or_default());
+    }
     let client = reqwest::Client::new();
     let res = client.post(cloudflare_api_url)
         .bearer_auth(cloudflare_api_key)
@@ -445,7 +466,9 @@ pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudf
     }
 
     let response_text = res.text().await?;
-    console_log!("[ZoneHttpRequests] GraphQL response: {}", response_text);
+    if debug_logging {
+        console_log!("[ZoneHttpRequests] GraphQL response: {}", response_text);
+    }
     let response_body: Response<get_zone_http_requests_query::ResponseData> = serde_json::from_str(&response_text)?;
     if response_body.errors.is_some() {
         console_log!("[ZoneHttpRequests] GraphQL query failed: {:?}", response_body.errors);
@@ -487,14 +510,8 @@ pub async fn do_get_zone_http_requests_query(cloudflare_api_url: &String, cloudf
     let timestamp_nanos: u64 = last_datetime.map(|datetime| {
         let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
         datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
-    }).unwrap_or_else(|| {
-        systemtime_to_nanos(SystemTime::now())
-    });
+    }).unwrap_or(fallback_timestamp_nanos);
 
     Ok(prometheus_registry_to_opentelemetry_metrics(registry, timestamp_nanos))
 }
 
-fn systemtime_to_nanos(time: web_time::SystemTime) -> u64 {
-    let duration = time.duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap();
-    duration.as_nanos() as u64
-}

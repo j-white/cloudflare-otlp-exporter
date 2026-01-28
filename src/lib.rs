@@ -12,6 +12,16 @@ use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do
 mod gql;
 mod metrics;
 
+const DEFAULT_SCRAPE_DELAY_SECONDS: i64 = 300;
+
+fn get_scrape_delay_seconds(env: &Env) -> i64 {
+    env.var("SCRAPE_DELAY")
+        .ok()
+        .and_then(|val| val.to_string().parse::<i64>().ok())
+        .filter(|val| *val >= 0)
+        .unwrap_or(DEFAULT_SCRAPE_DELAY_SECONDS)
+}
+
 #[worker::send]
 pub async fn do_fetch(
     url: String,
@@ -60,9 +70,15 @@ async fn do_trigger(env: Env) -> Result<()> {
     let cloudflare_api_url = env.var("CLOUDFLARE_API_URL")?.to_string();
     let cloudflare_api_key = env.var("CLOUDFLARE_API_KEY")?.to_string();
     let cloudflare_account_id = env.var("CLOUDFLARE_ACCOUNT_ID")?.to_string();
+    let debug_logging: bool = match env.var("DEBUG_LOGGING") {
+        Ok(val) => matches!(val.to_string().to_lowercase().as_str(), "true" | "1" | "yes"),
+        Err(_) => false,
+    };
 
-    let end = chrono::Utc::now().round_subsecs(0);
+    let scrape_delay_seconds = get_scrape_delay_seconds(&env);
+    let end = (chrono::Utc::now() - chrono::Duration::seconds(scrape_delay_seconds)).round_subsecs(0);
     let start = (end - chrono::Duration::minutes(1)).round_subsecs(0);
+    let fallback_timestamp_nanos = end.timestamp_nanos_opt().unwrap_or(0) as u64;
 
     console_log!("Fetching!");
     let mut all_metrics = Vec::new();
@@ -72,7 +88,7 @@ async fn do_trigger(env: Env) -> Result<()> {
         datetime_start: start.to_rfc3339(),
         datetime_end: end.to_rfc3339(),
         limit: 9999,
-    }).await;
+    }, debug_logging, fallback_timestamp_nanos).await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
@@ -90,7 +106,7 @@ async fn do_trigger(env: Env) -> Result<()> {
         datetime_start: start.to_rfc3339(),
         datetime_end: end.to_rfc3339(),
         limit: 9999,
-    }).await;
+    }, debug_logging, fallback_timestamp_nanos).await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
@@ -108,7 +124,7 @@ async fn do_trigger(env: Env) -> Result<()> {
         datetime_start: start.to_rfc3339(),
         datetime_end: end.to_rfc3339(),
         limit: 9999,
-    }).await;
+    }, debug_logging, fallback_timestamp_nanos).await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
@@ -126,7 +142,7 @@ async fn do_trigger(env: Env) -> Result<()> {
         datetime_start: start.to_rfc3339(),
         datetime_end: end.to_rfc3339(),
         limit: 9999,
-    }).await;
+    }, debug_logging, fallback_timestamp_nanos).await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
@@ -144,7 +160,7 @@ async fn do_trigger(env: Env) -> Result<()> {
         datetime_start: start.to_rfc3339(),
         datetime_end: end.to_rfc3339(),
         limit: 9999,
-    }).await;
+    }, debug_logging, fallback_timestamp_nanos).await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
@@ -171,7 +187,7 @@ async fn do_trigger(env: Env) -> Result<()> {
                 datetime_start: start.to_rfc3339(),
                 datetime_end: end.to_rfc3339(),
                 limit: 9999,
-            }).await;
+            }, debug_logging, fallback_timestamp_nanos).await;
             match result {
                 Ok(metrics) => {
                     for metric in metrics {
@@ -188,10 +204,10 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     console_log!("Done fetching!");
 
-    do_push_metrics(env, all_metrics).await
+    do_push_metrics(env, all_metrics, debug_logging).await
 }
 
-async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
+async fn do_push_metrics(env: Env, metrics: Vec<Metric>, debug_logging: bool) -> Result<()> {
     let metrics_url = env.var("METRICS_URL")?.to_string();
     let otlp_headers = match env.var("OTLP_HEADERS") {
         Ok(val) => val.to_string(),
@@ -225,8 +241,10 @@ async fn do_push_metrics(env: Env, metrics: Vec<Metric>) -> Result<()> {
     };
 
     // Log the OTLP payload as JSON for debugging
-    let metrics_json_for_logging = serde_json::to_string_pretty(&export_request).unwrap();
-    console_log!("OTLP metrics payload:\n{}", metrics_json_for_logging);
+    if debug_logging {
+        let metrics_json_for_logging = serde_json::to_string_pretty(&export_request).unwrap();
+        console_log!("OTLP metrics payload:\n{}", metrics_json_for_logging);
+    }
 
     let js_value: JsValue;
     let content_type: String;
