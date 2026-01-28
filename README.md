@@ -1,10 +1,13 @@
 # Cloudflare OpenTelemetry exporter
 
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/j-white/cloudflare-otlp-exporter)
+
 ## Description
 
 This worker was written to push Cloudflare Analytics data to an OpenTelemetry collector.
 
-It is inspired by the [cloudflare-exporter](https://github.com/lablabs/cloudflare-exporter), which is unfortunately no longer maintained.
+It is inspired by the [cloudflare-exporter](https://github.com/lablabs/cloudflare-exporter).
+
 By running it as a worker and pushing metrics, we avoid the need to deploy a dedicated container and allow the worker to be run on [green compute](https://blog.cloudflare.com/announcing-green-compute).
 
 ## Metrics currently supported
