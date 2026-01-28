@@ -23,7 +23,9 @@
               "sum": {
                 "duration": 0.04516975,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 2825,
+                "subrequests": 0
               }
             },
             {
@@ -45,7 +47,9 @@
               "sum": {
                 "duration": 0.06812937499999999,
                 "errors": 0,
-                "requests": 2
+                "requests": 2,
+                "wallTime": 7230,
+                "subrequests": 0
               }
             },
             {
@@ -67,7 +71,9 @@
               "sum": {
                 "duration": 0.09827549999999999,
                 "errors": 0,
-                "requests": 2
+                "requests": 2,
+                "wallTime": 2652,
+                "subrequests": 0
               }
             },
             {
@@ -89,7 +95,9 @@
               "sum": {
                 "duration": 0.0419345,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 5736,
+                "subrequests": 0
               }
             },
             {
@@ -111,7 +119,9 @@
               "sum": {
                 "duration": 0.04303725,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3164,
+                "subrequests": 0
               }
             },
             {
@@ -133,7 +143,9 @@
               "sum": {
                 "duration": 0.012805625,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3736,
+                "subrequests": 0
               }
             },
             {
@@ -155,7 +167,9 @@
               "sum": {
                 "duration": 0.026200375,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 4022,
+                "subrequests": 0
               }
             },
             {
@@ -177,7 +191,9 @@
               "sum": {
                 "duration": 0.0433325,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 6373,
+                "subrequests": 0
               }
             },
             {
@@ -199,7 +215,9 @@
               "sum": {
                 "duration": 0.041079250000000005,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3559,
+                "subrequests": 0
               }
             },
             {
@@ -221,7 +239,9 @@
               "sum": {
                 "duration": 0.014188875,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 5312,
+                "subrequests": 0
               }
             },
             {
@@ -243,7 +263,9 @@
               "sum": {
                 "duration": 0.043582625,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 4622,
+                "subrequests": 0
               }
             },
             {
@@ -265,7 +287,9 @@
               "sum": {
                 "duration": 0.012188125,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3190,
+                "subrequests": 0
               }
             },
             {
@@ -287,7 +311,9 @@
               "sum": {
                 "duration": 0.043589375,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3283,
+                "subrequests": 0
               }
             },
             {
@@ -309,7 +335,9 @@
               "sum": {
                 "duration": 0.0413035,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3632,
+                "subrequests": 0
               }
             },
             {
@@ -331,7 +359,9 @@
               "sum": {
                 "duration": 0.042014,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 5414,
+                "subrequests": 0
               }
             },
             {
@@ -353,7 +383,9 @@
               "sum": {
                 "duration": 0.054845374999999995,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 5182,
+                "subrequests": 0
               }
             },
             {
@@ -375,7 +407,9 @@
               "sum": {
                 "duration": 0.0423945,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 9972,
+                "subrequests": 0
               }
             },
             {
@@ -397,7 +431,9 @@
               "sum": {
                 "duration": 0.054611125,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 4044,
+                "subrequests": 0
               }
             },
             {
@@ -419,7 +455,9 @@
               "sum": {
                 "duration": 0.0428685,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3707,
+                "subrequests": 0
               }
             },
             {
@@ -441,7 +479,9 @@
               "sum": {
                 "duration": 0.043234499999999995,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 4460,
+                "subrequests": 0
               }
             },
             {
@@ -463,7 +503,9 @@
               "sum": {
                 "duration": 0.012762625,
                 "errors": 0,
-                "requests": 1
+                "requests": 1,
+                "wallTime": 3549,
+                "subrequests": 0
               }
             }
           ]

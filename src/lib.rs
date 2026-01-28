@@ -4,10 +4,17 @@ use opentelemetry_proto::tonic::common::v1::InstrumentationScope;
 use opentelemetry_proto::tonic::metrics::v1::{Metric, ResourceMetrics, ScopeMetrics};
 use prost::Message;
 
-use worker::*;
+use crate::gql::{
+    do_get_d1_analytics_query, do_get_durableobjects_analytics_query,
+    do_get_queue_backlog_analytics_query, do_get_queue_operations_analytics_query,
+    do_get_workers_analytics_query, do_get_zone_http_requests_query, get_d1_analytics_query,
+    get_durable_objects_analytics_query, get_queue_backlog_analytics_query,
+    get_queue_operations_analytics_query, get_workers_analytics_query,
+    get_zone_http_requests_query,
+};
 use worker::js_sys::Uint8Array;
 use worker::wasm_bindgen::JsValue;
-use crate::gql::{get_workers_analytics_query, do_get_workers_analytics_query, do_get_d1_analytics_query, get_d1_analytics_query, do_get_durableobjects_analytics_query, get_durable_objects_analytics_query, do_get_queue_backlog_analytics_query, get_queue_backlog_analytics_query, do_get_queue_operations_analytics_query, get_queue_operations_analytics_query, do_get_zone_http_requests_query, get_zone_http_requests_query};
+use worker::*;
 
 mod gql;
 mod metrics;
@@ -27,7 +34,7 @@ pub async fn do_fetch(
     url: String,
     headers: String,
     data: Option<JsValue>,
-    content_type: String
+    content_type: String,
 ) -> Result<Response> {
     let http_headers = Headers::new();
     // split headers by command, and then by =
@@ -36,10 +43,14 @@ pub async fn do_fetch(
         if parts.len() == 2 {
             let key = parts[0].trim();
             let value = parts[1].trim();
-            http_headers.set(key, value).expect("failed to construct header");
+            http_headers
+                .set(key, value)
+                .expect("failed to construct header");
         }
     }
-    http_headers.set("Content-Type", &content_type).expect("failed to construct content-type header");
+    http_headers
+        .set("Content-Type", &content_type)
+        .expect("failed to construct content-type header");
     let mut init = RequestInit::new();
     init.method = Method::Post;
     init.with_body(data).with_headers(http_headers);
@@ -53,7 +64,7 @@ async fn fetch(_req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let res = do_trigger(env).await;
     match res {
         Ok(_) => Response::ok("OK"),
-        Err(_) => Response::error("Error", 500)
+        Err(_) => Response::error("Error", 500),
     }
 }
 
@@ -71,102 +82,141 @@ async fn do_trigger(env: Env) -> Result<()> {
     let cloudflare_api_key = env.var("CLOUDFLARE_API_KEY")?.to_string();
     let cloudflare_account_id = env.var("CLOUDFLARE_ACCOUNT_ID")?.to_string();
     let debug_logging: bool = match env.var("DEBUG_LOGGING") {
-        Ok(val) => matches!(val.to_string().to_lowercase().as_str(), "true" | "1" | "yes"),
+        Ok(val) => matches!(
+            val.to_string().to_lowercase().as_str(),
+            "true" | "1" | "yes"
+        ),
         Err(_) => false,
     };
 
     let scrape_delay_seconds = get_scrape_delay_seconds(&env);
-    let end = (chrono::Utc::now() - chrono::Duration::seconds(scrape_delay_seconds)).round_subsecs(0);
+    let end =
+        (chrono::Utc::now() - chrono::Duration::seconds(scrape_delay_seconds)).round_subsecs(0);
     let start = (end - chrono::Duration::minutes(1)).round_subsecs(0);
     let fallback_timestamp_nanos = end.timestamp_nanos_opt().unwrap_or(0) as u64;
 
     console_log!("Fetching!");
     let mut all_metrics = Vec::new();
 
-    let result = do_get_workers_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_workers_analytics_query::Variables {
-        account_tag: cloudflare_account_id.clone(),
-        datetime_start: start.to_rfc3339(),
-        datetime_end: end.to_rfc3339(),
-        limit: 9999,
-    }, debug_logging, fallback_timestamp_nanos).await;
+    let result = do_get_workers_analytics_query(
+        &cloudflare_api_url,
+        &cloudflare_api_key,
+        get_workers_analytics_query::Variables {
+            account_tag: cloudflare_account_id.clone(),
+            datetime_start: start.to_rfc3339(),
+            datetime_end: end.to_rfc3339(),
+            limit: 9999,
+        },
+        debug_logging,
+        fallback_timestamp_nanos,
+    )
+    .await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
                 all_metrics.push(metric);
             }
-        },
+        }
         Err(e) => {
             console_log!("Querying Cloudflare API failed: {:?}", e);
             return Err(Error::JsError(e.to_string()));
         }
     };
 
-    let result = do_get_d1_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_d1_analytics_query::Variables {
-        account_tag: cloudflare_account_id.clone(),
-        datetime_start: start.to_rfc3339(),
-        datetime_end: end.to_rfc3339(),
-        limit: 9999,
-    }, debug_logging, fallback_timestamp_nanos).await;
+    let result = do_get_d1_analytics_query(
+        &cloudflare_api_url,
+        &cloudflare_api_key,
+        get_d1_analytics_query::Variables {
+            account_tag: cloudflare_account_id.clone(),
+            datetime_start: start.to_rfc3339(),
+            datetime_end: end.to_rfc3339(),
+            limit: 9999,
+        },
+        debug_logging,
+        fallback_timestamp_nanos,
+    )
+    .await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
                 all_metrics.push(metric);
             }
-        },
+        }
         Err(e) => {
             console_log!("Querying Cloudflare API failed: {:?}", e);
             return Err(Error::JsError(e.to_string()));
         }
     };
 
-    let result = do_get_durableobjects_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_durable_objects_analytics_query::Variables {
-        account_tag: cloudflare_account_id.clone(),
-        datetime_start: start.to_rfc3339(),
-        datetime_end: end.to_rfc3339(),
-        limit: 9999,
-    }, debug_logging, fallback_timestamp_nanos).await;
+    let result = do_get_durableobjects_analytics_query(
+        &cloudflare_api_url,
+        &cloudflare_api_key,
+        get_durable_objects_analytics_query::Variables {
+            account_tag: cloudflare_account_id.clone(),
+            datetime_start: start.to_rfc3339(),
+            datetime_end: end.to_rfc3339(),
+            limit: 9999,
+        },
+        debug_logging,
+        fallback_timestamp_nanos,
+    )
+    .await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
                 all_metrics.push(metric);
             }
-        },
+        }
         Err(e) => {
             console_log!("Querying Cloudflare API failed: {:?}", e);
             return Err(Error::JsError(e.to_string()));
         }
     };
 
-    let result = do_get_queue_backlog_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_queue_backlog_analytics_query::Variables {
-        account_tag: cloudflare_account_id.clone(),
-        datetime_start: start.to_rfc3339(),
-        datetime_end: end.to_rfc3339(),
-        limit: 9999,
-    }, debug_logging, fallback_timestamp_nanos).await;
+    let result = do_get_queue_backlog_analytics_query(
+        &cloudflare_api_url,
+        &cloudflare_api_key,
+        get_queue_backlog_analytics_query::Variables {
+            account_tag: cloudflare_account_id.clone(),
+            datetime_start: start.to_rfc3339(),
+            datetime_end: end.to_rfc3339(),
+            limit: 9999,
+        },
+        debug_logging,
+        fallback_timestamp_nanos,
+    )
+    .await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
                 all_metrics.push(metric);
             }
-        },
+        }
         Err(e) => {
             console_log!("Querying Cloudflare API failed: {:?}", e);
             return Err(Error::JsError(e.to_string()));
         }
     };
 
-    let result = do_get_queue_operations_analytics_query(&cloudflare_api_url, &cloudflare_api_key, get_queue_operations_analytics_query::Variables {
-        account_tag: cloudflare_account_id.clone(),
-        datetime_start: start.to_rfc3339(),
-        datetime_end: end.to_rfc3339(),
-        limit: 9999,
-    }, debug_logging, fallback_timestamp_nanos).await;
+    let result = do_get_queue_operations_analytics_query(
+        &cloudflare_api_url,
+        &cloudflare_api_key,
+        get_queue_operations_analytics_query::Variables {
+            account_tag: cloudflare_account_id.clone(),
+            datetime_start: start.to_rfc3339(),
+            datetime_end: end.to_rfc3339(),
+            limit: 9999,
+        },
+        debug_logging,
+        fallback_timestamp_nanos,
+    )
+    .await;
     match result {
         Ok(metrics) => {
             for metric in metrics {
                 all_metrics.push(metric);
             }
-        },
+        }
         Err(e) => {
             console_log!("Querying Cloudflare API failed: {:?}", e);
             return Err(Error::JsError(e.to_string()));
@@ -175,27 +225,38 @@ async fn do_trigger(env: Env) -> Result<()> {
 
     // Zone HTTP requests metrics (optional - only if CLOUDFLARE_ZONE_IDS is set)
     if let Ok(zone_ids_var) = env.var("CLOUDFLARE_ZONE_IDS") {
-        let zone_ids: Vec<String> = zone_ids_var.to_string()
+        let zone_ids: Vec<String> = zone_ids_var
+            .to_string()
             .split(',')
             .map(|s| s.trim().to_string())
             .filter(|s| !s.is_empty())
             .collect();
 
         if !zone_ids.is_empty() {
-            let result = do_get_zone_http_requests_query(&cloudflare_api_url, &cloudflare_api_key, get_zone_http_requests_query::Variables {
-                zone_i_ds: Some(zone_ids),
-                datetime_start: start.to_rfc3339(),
-                datetime_end: end.to_rfc3339(),
-                limit: 9999,
-            }, debug_logging, fallback_timestamp_nanos).await;
+            let result = do_get_zone_http_requests_query(
+                &cloudflare_api_url,
+                &cloudflare_api_key,
+                get_zone_http_requests_query::Variables {
+                    zone_i_ds: Some(zone_ids),
+                    datetime_start: start.to_rfc3339(),
+                    datetime_end: end.to_rfc3339(),
+                    limit: 9999,
+                },
+                debug_logging,
+                fallback_timestamp_nanos,
+            )
+            .await;
             match result {
                 Ok(metrics) => {
                     for metric in metrics {
                         all_metrics.push(metric);
                     }
-                },
+                }
                 Err(e) => {
-                    console_log!("Querying Cloudflare API for zone HTTP requests failed: {:?}", e);
+                    console_log!(
+                        "Querying Cloudflare API for zone HTTP requests failed: {:?}",
+                        e
+                    );
                     return Err(Error::JsError(e.to_string()));
                 }
             };
@@ -263,7 +324,11 @@ async fn do_push_metrics(env: Env, metrics: Vec<Metric>, debug_logging: bool) ->
     console_log!("Posting metrics to OTLP endpoint.");
     let mut res = do_fetch(metrics_url, otlp_headers, Some(js_value), content_type).await?;
     let body = res.text().await?;
-    console_log!("Done posting metrics status={} body={:?}", res.status_code(), body);
+    console_log!(
+        "Done posting metrics status={} body={:?}",
+        res.status_code(),
+        body
+    );
 
     if res.status_code() != 200 {
         return Err(Error::JsError(body));
