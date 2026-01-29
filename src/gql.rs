@@ -818,6 +818,19 @@ pub async fn do_get_zone_http_requests_query(
     let zone_ttfb = GaugeVec::new(zone_ttfb_opts, &["zone", "host", "quantile"]).unwrap();
     registry.register(Box::new(zone_ttfb.clone())).unwrap();
 
+    let zone_origin_response_duration_opts = Opts::new(
+        "cloudflare_zone_origin_response_duration_ms",
+        "Origin Response Duration - milliseconds",
+    );
+    let zone_origin_response_duration = GaugeVec::new(
+        zone_origin_response_duration_opts,
+        &["zone", "host", "quantile"],
+    )
+    .unwrap();
+    registry
+        .register(Box::new(zone_origin_response_duration.clone()))
+        .unwrap();
+
     let last_datetime: Option<Time> = None;
     for zone in response_data.viewer.unwrap().zones.iter() {
         let zone_tag = zone.zone_tag.clone();
@@ -841,6 +854,16 @@ pub async fn do_get_zone_http_requests_query(
                 zone_ttfb
                     .with_label_values(&[zone_tag.as_str(), host.as_str(), "P99"])
                     .set(quantiles.edge_time_to_first_byte_ms_p99);
+
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), "P50"])
+                    .set(quantiles.origin_response_duration_ms_p50);
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), "P95"])
+                    .set(quantiles.origin_response_duration_ms_p95);
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), "P99"])
+                    .set(quantiles.origin_response_duration_ms_p99);
             }
         }
     }

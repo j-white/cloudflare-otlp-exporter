@@ -16,6 +16,9 @@ query GetZoneHttpRequestsQuery($zoneIDs: [String!], $datetimeStart: Time!, $date
           edgeTimeToFirstByteMsP50
           edgeTimeToFirstByteMsP95
           edgeTimeToFirstByteMsP99
+          originResponseDurationMsP50
+          originResponseDurationMsP95
+          originResponseDurationMsP99
         }
       }
     }
