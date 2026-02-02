@@ -1,0 +1,147 @@
+{
+  "data": {
+    "viewer": {
+      "zones": [
+        {
+          "zoneTag": "zone123abc",
+          "httpRequestsAdaptiveGroups": [
+            {
+              "count": 150,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "example.com",
+                "coloCode": "SJC"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 45.2,
+                "edgeTimeToFirstByteMsP95": 120.5,
+                "edgeTimeToFirstByteMsP99": 250.8,
+                "originResponseDurationMsP50": 120.0,
+                "originResponseDurationMsP95": 350.0,
+                "originResponseDurationMsP99": 680.0
+              }
+            },
+            {
+              "count": 25,
+              "dimensions": {
+                "edgeResponseStatus": 304,
+                "clientRequestHTTPHost": "example.com",
+                "coloCode": "IAD"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 12.1,
+                "edgeTimeToFirstByteMsP95": 35.4,
+                "edgeTimeToFirstByteMsP99": 78.2,
+                "originResponseDurationMsP50": 0.0,
+                "originResponseDurationMsP95": 0.0,
+                "originResponseDurationMsP99": 0.0
+              }
+            },
+            {
+              "count": 10,
+              "dimensions": {
+                "edgeResponseStatus": 404,
+                "clientRequestHTTPHost": "example.com",
+                "coloCode": "LHR"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 8.5,
+                "edgeTimeToFirstByteMsP95": 22.3,
+                "edgeTimeToFirstByteMsP99": 45.1,
+                "originResponseDurationMsP50": 25.0,
+                "originResponseDurationMsP95": 60.0,
+                "originResponseDurationMsP99": 120.0
+              }
+            },
+            {
+              "count": 5,
+              "dimensions": {
+                "edgeResponseStatus": 500,
+                "clientRequestHTTPHost": "example.com",
+                "coloCode": "SJC"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 350.2,
+                "edgeTimeToFirstByteMsP95": 890.4,
+                "edgeTimeToFirstByteMsP99": 1250.6,
+                "originResponseDurationMsP50": 800.0,
+                "originResponseDurationMsP95": 2200.0,
+                "originResponseDurationMsP99": 4500.0
+              }
+            },
+            {
+              "count": 80,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "api.example.com",
+                "coloCode": "ORD"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 65.8,
+                "edgeTimeToFirstByteMsP95": 180.2,
+                "edgeTimeToFirstByteMsP99": 320.5,
+                "originResponseDurationMsP50": 180.0,
+                "originResponseDurationMsP95": 520.0,
+                "originResponseDurationMsP99": 950.0
+              }
+            },
+            {
+              "count": 3,
+              "dimensions": {
+                "edgeResponseStatus": 401,
+                "clientRequestHTTPHost": "api.example.com",
+                "coloCode": "DFW"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 15.3,
+                "edgeTimeToFirstByteMsP95": 42.1,
+                "edgeTimeToFirstByteMsP99": 88.7,
+                "originResponseDurationMsP50": 40.0,
+                "originResponseDurationMsP95": 110.0,
+                "originResponseDurationMsP99": 220.0
+              }
+            }
+          ]
+        },
+        {
+          "zoneTag": "zone456def",
+          "httpRequestsAdaptiveGroups": [
+            {
+              "count": 200,
+              "dimensions": {
+                "edgeResponseStatus": 200,
+                "clientRequestHTTPHost": "myapp.io",
+                "coloCode": "FRA"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 55.4,
+                "edgeTimeToFirstByteMsP95": 145.8,
+                "edgeTimeToFirstByteMsP99": 285.2,
+                "originResponseDurationMsP50": 150.0,
+                "originResponseDurationMsP95": 420.0,
+                "originResponseDurationMsP99": 780.0
+              }
+            },
+            {
+              "count": 15,
+              "dimensions": {
+                "edgeResponseStatus": 503,
+                "clientRequestHTTPHost": "myapp.io",
+                "coloCode": "NRT"
+              },
+              "quantiles": {
+                "edgeTimeToFirstByteMsP50": 5200.1,
+                "edgeTimeToFirstByteMsP95": 8500.5,
+                "edgeTimeToFirstByteMsP99": 12000.8,
+                "originResponseDurationMsP50": 15000.0,
+                "originResponseDurationMsP95": 25000.0,
+                "originResponseDurationMsP99": 30000.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "errors": null
+}

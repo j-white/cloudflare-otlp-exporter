@@ -1,0 +1,27 @@
+query GetZoneHttpRequestsByColoQuery($zoneIDs: [String!], $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
+  viewer {
+    zones(filter: { zoneTag_in: $zoneIDs }) {
+      zoneTag
+      httpRequestsAdaptiveGroups(limit: $limit, filter: {
+        datetime_geq: $datetimeStart,
+        datetime_lt: $datetimeEnd,
+        requestSource_in: ["eyeball"]
+      }) {
+        count
+        dimensions {
+          edgeResponseStatus
+          clientRequestHTTPHost
+          coloCode
+        }
+        quantiles {
+          edgeTimeToFirstByteMsP50
+          edgeTimeToFirstByteMsP95
+          edgeTimeToFirstByteMsP99
+          originResponseDurationMsP50
+          originResponseDurationMsP95
+          originResponseDurationMsP99
+        }
+      }
+    }
+  }
+}

@@ -3,6 +3,7 @@ use chrono::NaiveDateTime;
 use graphql_client::{GraphQLQuery, Response};
 use opentelemetry_proto::tonic::metrics::v1::Metric;
 use prometheus::{CounterVec, GaugeVec, Opts, Registry};
+use std::collections::HashSet;
 use std::error::Error;
 use worker::console_log;
 
@@ -49,6 +50,13 @@ pub struct GetQueueOperationsAnalyticsQuery;
     query_path = "gql/zone_http_requests_query.graphql"
 )]
 pub struct GetZoneHttpRequestsQuery;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
+    query_path = "gql/zone_http_requests_by_colo_query.graphql"
+)]
+pub struct GetZoneHttpRequestsByColoQuery;
 
 #[allow(non_camel_case_types)]
 type float32 = f32;
@@ -863,6 +871,125 @@ pub async fn do_get_zone_http_requests_query(
                     .set(quantiles.origin_response_duration_ms_p95);
                 zone_origin_response_duration
                     .with_label_values(&[zone_tag.as_str(), host.as_str(), "P99"])
+                    .set(quantiles.origin_response_duration_ms_p99);
+            }
+        }
+    }
+
+    let timestamp_nanos: u64 = last_datetime
+        .map(|datetime| {
+            let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+            datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
+        })
+        .unwrap_or(fallback_timestamp_nanos);
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(
+        registry,
+        timestamp_nanos,
+    ))
+}
+
+pub async fn do_get_zone_http_requests_by_colo_query(
+    cloudflare_api_url: &String,
+    cloudflare_api_key: &String,
+    variables: get_zone_http_requests_by_colo_query::Variables,
+    debug_logging: bool,
+    fallback_timestamp_nanos: u64,
+    colo_hosts: &HashSet<String>,
+) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetZoneHttpRequestsByColoQuery::build_query(variables);
+    if debug_logging {
+        console_log!(
+            "[ZoneHttpRequestsByColo] GraphQL request: {}",
+            serde_json::to_string_pretty(&request_body).unwrap_or_default()
+        );
+    }
+    let client = reqwest::Client::new();
+    let res = client
+        .post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body)
+        .send()
+        .await?;
+
+    if !res.status().is_success() {
+        console_log!(
+            "[ZoneHttpRequestsByColo] GraphQL query failed: {:?}",
+            res.status()
+        );
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_text = res.text().await?;
+    if debug_logging {
+        console_log!("[ZoneHttpRequestsByColo] GraphQL response: {}", response_text);
+    }
+    let response_body: Response<get_zone_http_requests_by_colo_query::ResponseData> =
+        serde_json::from_str(&response_text)?;
+    if response_body.errors.is_some() {
+        console_log!(
+            "[ZoneHttpRequestsByColo] GraphQL query failed: {:?}",
+            response_body.errors
+        );
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_zone_http_requests_by_colo_query::ResponseData =
+        response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let zone_ttfb_opts = Opts::new(
+        "cloudflare_zone_edge_ttfb_ms",
+        "Edge Time To First Byte - milliseconds",
+    );
+    let zone_ttfb =
+        GaugeVec::new(zone_ttfb_opts, &["zone", "host", "colo", "quantile"]).unwrap();
+    registry.register(Box::new(zone_ttfb.clone())).unwrap();
+
+    let zone_origin_response_duration_opts = Opts::new(
+        "cloudflare_zone_origin_response_duration_ms",
+        "Origin Response Duration - milliseconds",
+    );
+    let zone_origin_response_duration = GaugeVec::new(
+        zone_origin_response_duration_opts,
+        &["zone", "host", "colo", "quantile"],
+    )
+    .unwrap();
+    registry
+        .register(Box::new(zone_origin_response_duration.clone()))
+        .unwrap();
+
+    let last_datetime: Option<Time> = None;
+    for zone in response_data.viewer.unwrap().zones.iter() {
+        let zone_tag = zone.zone_tag.clone();
+        for group in zone.http_requests_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            let host = dimensions.client_request_http_host.clone();
+            let colo = dimensions.colo_code.clone();
+
+            // Only emit metrics for configured hosts
+            if !colo_hosts.contains(&host) {
+                continue;
+            }
+
+            if let Some(quantiles) = &group.quantiles {
+                zone_ttfb
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P50"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p50);
+                zone_ttfb
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P95"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p95);
+                zone_ttfb
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P99"])
+                    .set(quantiles.edge_time_to_first_byte_ms_p99);
+
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P50"])
+                    .set(quantiles.origin_response_duration_ms_p50);
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P95"])
+                    .set(quantiles.origin_response_duration_ms_p95);
+                zone_origin_response_duration
+                    .with_label_values(&[zone_tag.as_str(), host.as_str(), colo.as_str(), "P99"])
                     .set(quantiles.origin_response_duration_ms_p99);
             }
         }

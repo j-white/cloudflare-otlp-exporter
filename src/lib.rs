@@ -7,10 +7,11 @@ use prost::Message;
 use crate::gql::{
     do_get_d1_analytics_query, do_get_durableobjects_analytics_query,
     do_get_queue_backlog_analytics_query, do_get_queue_operations_analytics_query,
-    do_get_workers_analytics_query, do_get_zone_http_requests_query, get_d1_analytics_query,
+    do_get_workers_analytics_query, do_get_zone_http_requests_by_colo_query,
+    do_get_zone_http_requests_query, get_d1_analytics_query,
     get_durable_objects_analytics_query, get_queue_backlog_analytics_query,
     get_queue_operations_analytics_query, get_workers_analytics_query,
-    get_zone_http_requests_query,
+    get_zone_http_requests_by_colo_query, get_zone_http_requests_query,
 };
 use worker::js_sys::Uint8Array;
 use worker::wasm_bindgen::JsValue;
@@ -237,7 +238,7 @@ async fn do_trigger(env: Env) -> Result<()> {
                 &cloudflare_api_url,
                 &cloudflare_api_key,
                 get_zone_http_requests_query::Variables {
-                    zone_i_ds: Some(zone_ids),
+                    zone_i_ds: Some(zone_ids.clone()),
                     datetime_start: start.to_rfc3339(),
                     datetime_end: end.to_rfc3339(),
                     limit: 9999,
@@ -260,6 +261,47 @@ async fn do_trigger(env: Env) -> Result<()> {
                     return Err(Error::JsError(e.to_string()));
                 }
             };
+
+            // Optionally query with coloCode dimension for configured hosts
+            if let Ok(zone_colo_hosts_var) = env.var("ZONE_COLO_HOSTS") {
+                let colo_hosts: std::collections::HashSet<String> = zone_colo_hosts_var
+                    .to_string()
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+
+                if !colo_hosts.is_empty() {
+                    let result = do_get_zone_http_requests_by_colo_query(
+                        &cloudflare_api_url,
+                        &cloudflare_api_key,
+                        get_zone_http_requests_by_colo_query::Variables {
+                            zone_i_ds: Some(zone_ids),
+                            datetime_start: start.to_rfc3339(),
+                            datetime_end: end.to_rfc3339(),
+                            limit: 9999,
+                        },
+                        debug_logging,
+                        fallback_timestamp_nanos,
+                        &colo_hosts,
+                    )
+                    .await;
+                    match result {
+                        Ok(metrics) => {
+                            for metric in metrics {
+                                all_metrics.push(metric);
+                            }
+                        }
+                        Err(e) => {
+                            console_log!(
+                                "Querying Cloudflare API for zone HTTP requests by colo failed: {:?}",
+                                e
+                            );
+                            return Err(Error::JsError(e.to_string()));
+                        }
+                    };
+                }
+            }
         }
     }
 
