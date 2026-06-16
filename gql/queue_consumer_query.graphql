@@ -1,0 +1,20 @@
+query GetQueueConsumerMetricsAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $datetimeEnd: Time!, $limit: Int!) {
+    viewer {
+        accounts(filter: {accountTag: $accountTag}) {
+            queueConsumerMetricsAdaptiveGroups(limit: $limit, filter: {
+                datetimeMinute_geq: $datetimeStart,
+                datetimeMinute_lt: $datetimeEnd
+            }) {
+                dimensions {
+                    queueId
+                    datetimeMinute
+                }
+
+                avg {
+                    concurrency
+                    sampleInterval
+                }
+            }
+        }
+    }
+}

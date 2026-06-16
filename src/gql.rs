@@ -47,6 +47,13 @@ pub struct GetQueueOperationsAnalyticsQuery;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "gql/schema.graphql",
+    query_path = "gql/queue_consumer_query.graphql"
+)]
+pub struct GetQueueConsumerMetricsAnalyticsQuery;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "gql/schema.graphql",
     query_path = "gql/zone_http_requests_query.graphql"
 )]
 pub struct GetZoneHttpRequestsQuery;
@@ -745,6 +752,103 @@ pub async fn do_get_queue_operations_analytics_query(
                     queue_id.as_str(),
                     outcome.as_str(),
                 ])
+                .set(avg.sample_interval);
+        }
+    }
+
+    let timestamp_nanos: u64 = last_datetime
+        .map(|datetime| {
+            let datetime: NaiveDateTime = NaiveDateTime::parse_from_str(&datetime, "%+").unwrap();
+            datetime.and_utc().timestamp_nanos_opt().unwrap_or(0) as u64
+        })
+        .unwrap_or(fallback_timestamp_nanos);
+
+    Ok(prometheus_registry_to_opentelemetry_metrics(
+        registry,
+        timestamp_nanos,
+    ))
+}
+
+pub async fn do_get_queue_consumer_metrics_analytics_query(
+    cloudflare_api_url: &String,
+    cloudflare_api_key: &String,
+    variables: get_queue_consumer_metrics_analytics_query::Variables,
+    debug_logging: bool,
+    fallback_timestamp_nanos: u64,
+) -> Result<Vec<Metric>, Box<dyn Error>> {
+    let request_body = GetQueueConsumerMetricsAnalyticsQuery::build_query(variables);
+    if debug_logging {
+        console_log!(
+            "[QueueConsumerMetrics] GraphQL request: {}",
+            serde_json::to_string_pretty(&request_body).unwrap_or_default()
+        );
+    }
+    let client = reqwest::Client::new();
+    let res = client
+        .post(cloudflare_api_url)
+        .bearer_auth(cloudflare_api_key)
+        .json(&request_body)
+        .send()
+        .await?;
+
+    if !res.status().is_success() {
+        console_log!(
+            "[QueueConsumerMetrics] GraphQL query failed: {:?}",
+            res.status()
+        );
+        return Err(Box::new(res.error_for_status().unwrap_err()));
+    }
+
+    let response_text = res.text().await?;
+    if debug_logging {
+        console_log!("[QueueConsumerMetrics] GraphQL response: {}", response_text);
+    }
+    let response_body: Response<get_queue_consumer_metrics_analytics_query::ResponseData> =
+        serde_json::from_str(&response_text)?;
+    if response_body.errors.is_some() {
+        console_log!(
+            "[QueueConsumerMetrics] GraphQL query failed: {:?}",
+            response_body.errors
+        );
+        return Err(Box::new(worker::Error::JsError("graphql".parse().unwrap())));
+    }
+    let response_data: get_queue_consumer_metrics_analytics_query::ResponseData =
+        response_body.data.expect("missing response data");
+
+    let registry = Registry::new();
+    let queue_consumer_concurrency_opts = Opts::new(
+        "cloudflare_queue_consumer_concurrency",
+        "The average concurrency of the queue consumer over the sample interval. Compare against the consumer's configured max_concurrency to detect under-scheduling.",
+    );
+    let queue_consumer_concurrency =
+        GaugeVec::new(queue_consumer_concurrency_opts, &["queue_id"]).unwrap();
+    registry
+        .register(Box::new(queue_consumer_concurrency.clone()))
+        .unwrap();
+
+    let queue_consumer_sample_interval_opts = Opts::new(
+        "cloudflare_queue_consumer_sample_interval",
+        "The average value used for sample interval",
+    );
+    let queue_consumer_sample_interval =
+        GaugeVec::new(queue_consumer_sample_interval_opts, &["queue_id"]).unwrap();
+    registry
+        .register(Box::new(queue_consumer_sample_interval.clone()))
+        .unwrap();
+
+    let mut last_datetime: Option<Time> = None;
+    for account in response_data.viewer.unwrap().accounts.iter() {
+        for group in account.queue_consumer_metrics_adaptive_groups.iter() {
+            let dimensions = group.dimensions.as_ref().unwrap();
+            last_datetime = Some(dimensions.datetime_minute.clone());
+            let queue_id = dimensions.queue_id.clone();
+            let avg = group.avg.as_ref().unwrap();
+
+            queue_consumer_concurrency
+                .with_label_values(&[queue_id.as_str()])
+                .set(avg.concurrency);
+            queue_consumer_sample_interval
+                .with_label_values(&[queue_id.as_str()])
                 .set(avg.sample_interval);
         }
     }

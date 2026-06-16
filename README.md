@@ -15,7 +15,7 @@ By running it as a worker and pushing metrics, we avoid the need to deploy a ded
 - [x] Workers
 - [x] D1
 - [x] Durable Objects
-- [x] Queues
+- [x] Queues (backlog, message operations, consumer concurrency)
 - [x] Zones
 
 ## Usage
