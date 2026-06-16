@@ -166,6 +166,15 @@ pub async fn do_get_workers_analytics_query(
         .register(Box::new(worker_subrequests.clone()))
         .unwrap();
 
+    let worker_cpu_time_us_opts = Opts::new(
+        "cloudflare_worker_cpu_time_us",
+        "CPU time over the interval - microseconds",
+    );
+    let worker_cpu_time_us = GaugeVec::new(worker_cpu_time_us_opts, &["script_name"]).unwrap();
+    registry
+        .register(Box::new(worker_cpu_time_us.clone()))
+        .unwrap();
+
     let mut last_datetime: Option<Time> = None;
     for account in response_data.viewer.unwrap().accounts.iter() {
         for worker in account.workers_invocations_adaptive.iter() {
@@ -187,6 +196,9 @@ pub async fn do_get_workers_analytics_query(
             worker_subrequests
                 .with_label_values(&[script_name.as_str()])
                 .inc_by(sum.subrequests as f64);
+            worker_cpu_time_us
+                .with_label_values(&[script_name.as_str()])
+                .add(sum.cpu_time_us as f64);
             worker_cpu_time
                 .with_label_values(&[script_name.as_str(), "P50"])
                 .set(quantiles.cpu_time_p50 as f64);

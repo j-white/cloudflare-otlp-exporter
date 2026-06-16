@@ -17,6 +17,7 @@ query GetWorkersAnalyticsQuery($accountTag: string!, $datetimeStart: Time!, $dat
           duration
           wallTime
           subrequests
+          cpuTimeUs
         }
 
         quantiles {
